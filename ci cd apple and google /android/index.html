@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل CI/CD لنشر تطبيقات Flutter على Google Play Store | الدليل الشامل والمطور</title>
+  <meta name="description" content="دليل احترافي تفاعلي متكامل لرفع أي تطبيق Flutter إلى Google Play Console تلقائياً باستخدام GitHub Actions مع زيادة أرقام الإصدارات وإدارة التوقيع بأمان.">
+
+  <!-- Google Fonts: Cairo (Arabic), Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070d18;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(22, 33, 58, 0.85);
+      --bg-code: #050912;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(61, 220, 132, 0.35);
+
+      --android-green: #3DDC84;
+      --android-glow: rgba(61, 220, 132, 0.25);
+      --play-blue: #01875f;
+      --primary: #3DDC84;
+      --primary-glow: rgba(61, 220, 132, 0.25);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --purple: #a855f7;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #f43f5e;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --sidebar-width: 320px;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(61, 220, 132, 0.07) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.06) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--android-green);
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(8, 14, 26, 0.94);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      padding: 24px 18px;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #01875f, #3DDC84);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #070d18;
+      font-weight: 900;
+      font-size: 24px;
+      box-shadow: 0 0 24px var(--android-glow);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--android-green);
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Progress Widget */
+    .progress-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, var(--android-green));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 12px var(--android-glow);
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .nav-item a:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-color);
+      transform: translateX(-4px);
+    }
+
+    .nav-item.active a {
+      color: var(--android-green);
+      background: rgba(61, 220, 132, 0.09);
+      border-color: var(--border-accent);
+      font-weight: 700;
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #1e293b;
+      color: var(--text-dim);
+    }
+
+    .nav-item.active .nav-badge {
+      background: var(--android-glow);
+      color: var(--android-green);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .btn-hub-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-hub-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--android-green);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-right: var(--sidebar-width);
+      flex: 1;
+      padding: 40px 60px 100px;
+      max-width: calc(100vw - var(--sidebar-width));
+    }
+
+    /* Mobile Menu Toggle */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 200;
+      background: var(--android-green);
+      color: #070d18;
+      border: none;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--android-glow);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, rgba(61, 220, 132, 0.12) 0%, rgba(1, 135, 95, 0.08) 50%, rgba(15, 23, 42, 0.7) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 44px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, var(--android-glow) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .badge-android {
+      background: rgba(61, 220, 132, 0.14);
+      color: var(--android-green);
+      border-color: rgba(61, 220, 132, 0.3);
+    }
+
+    .badge-play {
+      background: rgba(1, 135, 95, 0.2);
+      color: #4ade80;
+      border-color: rgba(1, 135, 95, 0.4);
+    }
+
+    .badge-actions {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .badge-flutter {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .hero-title {
+      font-size: 36px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(120deg, var(--android-green), #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 860px;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .stat-card {
+      background: rgba(10, 15, 29, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      font-size: 26px;
+      color: var(--android-green);
+    }
+
+    .stat-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Dynamic Replacer Box (Interactive) */
+    .variable-box {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(20, 31, 56, 0.85) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .variable-box-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .variable-box-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-field {
+      background: #070b14;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      direction: ltr;
+      text-align: left;
+      transition: var(--transition);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--android-green);
+      box-shadow: 0 0 10px var(--android-glow);
+    }
+
+    /* Section & Cards */
+    .section-container {
+      margin-bottom: 50px;
+      scroll-margin-top: 30px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .step-number {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--android-green), #01875f);
+      color: #070d18;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 0 16px var(--android-glow);
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .step-check-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .step-check-btn:hover {
+      background: rgba(61, 220, 132, 0.1);
+      color: var(--android-green);
+      border-color: var(--android-green);
+    }
+
+    .step-check-btn.completed {
+      background: var(--android-green);
+      color: #070d18;
+      border-color: var(--android-green);
+      box-shadow: 0 0 14px var(--android-glow);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 26px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: var(--bg-card-hover);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    ul, ol {
+      margin-bottom: 18px;
+      padding-right: 24px;
+      color: var(--text-muted);
+      font-size: 14.5px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    li strong {
+      color: #fff;
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      background: var(--bg-code);
+      border: 1px solid #1a2234;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin: 18px 0;
+      position: relative;
+    }
+
+    .code-header {
+      background: #090e1a;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1a2234;
+    }
+
+    .code-lang {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--android-green);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-lang::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--android-green);
+      box-shadow: 0 0 8px var(--android-glow);
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: var(--android-green);
+      color: #070d18;
+      border-color: var(--android-green);
+    }
+
+    pre {
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    p code, li code, td code {
+      background: rgba(61, 220, 132, 0.1);
+      color: var(--android-green);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 13px;
+      border: 1px solid rgba(61, 220, 132, 0.2);
+      direction: ltr;
+      display: inline-block;
+    }
+
+    /* Alerts */
+    .alert {
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin: 18px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border: 1px solid transparent;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .alert-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+    .alert-warning strong { color: #f59e0b; }
+
+    .alert-danger {
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fecdd3;
+    }
+    .alert-danger strong { color: #f43f5e; }
+
+    .alert-tip {
+      background: rgba(61, 220, 132, 0.08);
+      border-color: rgba(61, 220, 132, 0.25);
+      color: #bbf7d0;
+    }
+    .alert-tip strong { color: var(--android-green); }
+
+    .alert-info {
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.25);
+      color: #bae6fd;
+    }
+    .alert-info strong { color: var(--accent); }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 18px 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    th {
+      background: #0d1527;
+      color: #fff;
+      padding: 14px 18px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(26, 36, 56, 0.6);
+    }
+
+    /* Workflow Visual Stepper */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .flow-step-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      position: relative;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .flow-step-card:hover {
+      border-color: var(--android-green);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(61, 220, 132, 0.12);
+    }
+
+    .flow-step-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: rgba(61, 220, 132, 0.15);
+      color: var(--android-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .flow-step-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .flow-step-desc {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Tabs */
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 18px;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--android-green);
+      background: rgba(61, 220, 132, 0.12);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Troubleshooting Search */
+    .search-box {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: #090e1a;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-md);
+      padding: 14px 20px 14px 44px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Cairo', sans-serif;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--android-green);
+      box-shadow: 0 0 16px var(--android-glow);
+    }
+
+    .trouble-item {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 14px;
+      transition: var(--transition);
+    }
+
+    .trouble-item:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .trouble-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fca5a5;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .trouble-solution {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(13, 22, 40, 0.95);
+      border: 1px solid var(--android-green);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--android-glow);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Links */
+    a.link {
+      color: var(--android-green);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px dashed rgba(61, 220, 132, 0.5);
+      transition: var(--transition);
+    }
+
+    a.link:hover {
+      color: #fff;
+      border-bottom-color: #fff;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-right: 0;
+        max-width: 100vw;
+        padding: 30px 24px 80px;
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div id="toast">
+    <span style="color: var(--android-green); font-size: 18px;">✓</span>
+    <span id="toast-msg">تم نسخ الكود بنجاح إلى الحافظة!</span>
+  </div>
+
+  <!-- Mobile Toggle Button -->
+  <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle Navigation">☰</button>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon">🤖</div>
+        <div>
+          <div class="brand-title">Google Play CI/CD</div>
+          <div class="brand-sub">Flutter &amp; GitHub Actions</div>
+        </div>
+      </div>
+
+      <!-- Live Progress Widget -->
+      <div class="progress-box">
+        <div class="progress-header">
+          <span>نسبة إنجاز الخطوات</span>
+          <span id="progress-percent" style="color: var(--android-green);">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Navigation List -->
+      <ul class="nav-links">
+        <li class="nav-item active"><a href="#overview"><span>1. نظرة عامة والمعمارية</span><span class="nav-badge">01</span></a></li>
+        <li class="nav-item"><a href="#prerequisites"><span>2. المتطلبات الأساسية</span><span class="nav-badge">02</span></a></li>
+        <li class="nav-item"><a href="#service-account"><span>3. مفتاح Google Cloud JSON</span><span class="nav-badge">03</span></a></li>
+        <li class="nav-item"><a href="#play-permissions"><span>4. ربط الأذونات في Play Console</span><span class="nav-badge">04</span></a></li>
+        <li class="nav-item"><a href="#keystore-signing"><span>5. ملف Keystore والتشفير Base64</span><span class="nav-badge">05</span></a></li>
+        <li class="nav-item"><a href="#github-secrets"><span>6. إعداد GitHub Secrets</span><span class="nav-badge">06</span></a></li>
+        <li class="nav-item"><a href="#project-config"><span>7. تهيئة Gradle &amp; Flutter</span><span class="nav-badge">07</span></a></li>
+        <li class="nav-item"><a href="#workflow-file"><span>8. ملف الـ Workflow الكامل</span><span class="nav-badge">08</span></a></li>
+        <li class="nav-item"><a href="#branching-strategy"><span>9. استراتيجية الفروع والتشغيل</span><span class="nav-badge">09</span></a></li>
+        <li class="nav-item"><a href="#troubleshooting"><span>10. الأخطاء الشائعة وحلولها</span><span class="nav-badge">10</span></a></li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <a href="../ios/workflows/index.html" class="btn-hub-link">
+          <span>🍏</span> انتقال لدليل أبل iOS CI/CD
+        </a>
+        <a href="../../README.md" class="btn-hub-link">
+          <span>🏠</span> العودة للمستودع الرئيسي
+        </a>
+        <div style="text-align: center; margin-top: 6px;">
+          إعداد: <strong>Mohamed Gaber</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- Hero Header -->
+      <header class="hero">
+        <div class="hero-badges">
+          <span class="badge badge-android">🤖 Android</span>
+          <span class="badge badge-play">🛒 Google Play Console</span>
+          <span class="badge badge-actions">⚡ GitHub Actions (Ubuntu)</span>
+          <span class="badge badge-flutter">💙 Flutter App Bundle</span>
+          <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">🚀 Production Ready</span>
+        </div>
+
+        <h1 class="hero-title">دليل أتمتة نشر تطبيقات Flutter على <span>Google Play Store</span></h1>
+        <p class="hero-desc">
+          دليل احترافي تفاعلي متكامل لإعداد خط سير عمل (CI/CD Pipeline) متطور باستخدام GitHub Actions لبناء وتوقيع ورفع حزم تطبيقات Flutter (Android App Bundle - <code>.aab</code>) تلقائياً إلى Google Play Store مع زيادة أرقام الإصدارات آلياً ودعم التشغيل اليدوي والدمج الآمن.
+        </p>
+
+        <!-- Key Metrics Cards -->
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div>
+              <div class="stat-num">Ubuntu Runner</div>
+              <div class="stat-label">سيرفر مجاني وسريع جداً</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔄</div>
+            <div>
+              <div class="stat-num">Auto Versioning</div>
+              <div class="stat-label">توليد Build Number تلقائي</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔒</div>
+            <div>
+              <div class="stat-num">Zero-Credential</div>
+              <div class="stat-label">حساب خدمة رسمي مشفر</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div>
+              <div class="stat-num">.AAB Format</div>
+              <div class="stat-label">توليد وتوقيع حزم Release</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Interactive Variable Replacer -->
+      <section class="variable-box">
+        <div class="variable-box-title">
+          <span>⚡</span>
+          <span>المخصص التفاعلي لأوامر مشروعك (Live Code Customizer)</span>
+        </div>
+        <p class="variable-box-desc">
+          أدخل بيانات تطبيقك ومفاتيح التوقيع في الحقول أدناه، وسيتم تحديث وتخصيص جميع أوامر الـ Terminal وأكواد الـ Gradle و YAML في كامل الصفحة تلقائياً لتناسب مشروعك مباشرة!
+        </p>
+
+        <div class="input-grid">
+          <div class="input-group">
+            <label for="input-pkg">اسم الحزمة (Package Name / Application ID)</label>
+            <input type="text" id="input-pkg" class="input-field" value="com.codebyte.mondera" placeholder="com.example.app">
+          </div>
+          <div class="input-group">
+            <label for="input-alias">اسم مفتاح التوقيع (Key Alias)</label>
+            <input type="text" id="input-alias" class="input-field" value="upload" placeholder="upload">
+          </div>
+          <div class="input-group">
+            <label for="input-storepass">كلمة سر المتجر (Store Password)</label>
+            <input type="text" id="input-storepass" class="input-field" value="MyStrongStorePass123" placeholder="YOUR_STORE_PASSWORD">
+          </div>
+          <div class="input-group">
+            <label for="input-keypass">كلمة سر المفتاح (Key Password)</label>
+            <input type="text" id="input-keypass" class="input-field" value="MyStrongKeyPass123" placeholder="YOUR_KEY_PASSWORD">
+          </div>
+          <div class="input-group">
+            <label for="input-track">مسار الاختبار (Release Track)</label>
+            <input type="text" id="input-track" class="input-field" value="internal" placeholder="internal / alpha / beta / production">
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: Overview & Architecture -->
+      <section class="section-container" id="overview">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">1</div>
+            <h2 class="section-title">نظرة عامة ومخطط تدفق العمل (Architecture Workflow)</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(0, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            تعتمد آلية الرفع التلقائي لمتجر جوجل بلاي على بيئة عمل خالية تماماً من التدخل اليدوي، حيث يقوم GitHub Actions بالتعامل مع عملية البناء والتوقيع والرفع من خلال تدفق سحابي محكم:
+          </p>
+
+          <div class="flow-grid">
+            <div class="flow-step-card">
+              <div class="flow-step-badge">1</div>
+              <div class="flow-step-title">Trigger Event</div>
+              <div class="flow-step-desc">دمج التعديلات على فرع <code>release</code> أو التشغيل اليدوي بضغطة زر مع تحديد رقم إصدار اختياري.</div>
+            </div>
+            <div class="flow-step-card">
+              <div class="flow-step-badge">2</div>
+              <div class="flow-step-title">Setup Environment</div>
+              <div class="flow-step-desc">تجهيز Java 17 و Flutter SDK على سيرفر Ubuntu فائق السرعة مع تفعيل الـ Cache لـ Gradle.</div>
+            </div>
+            <div class="flow-step-card">
+              <div class="flow-step-badge">3</div>
+              <div class="flow-step-title">Dynamic Versioning</div>
+              <div class="flow-step-desc">استخراج الإصدار وحساب <code>Build Number</code> جديد تلقائياً (Base + GitHub Run Number) لمنع تكرار الإصدارات.</div>
+            </div>
+            <div class="flow-step-card">
+              <div class="flow-step-badge">4</div>
+              <div class="flow-step-title">Restore Keystore</div>
+              <div class="flow-step-desc">فك تشفير ملف الـ Keystore المشفر Base64 وحقن ملف <code>key.properties</code> لحظياً لتوقيع التطبيق.</div>
+            </div>
+            <div class="flow-step-card">
+              <div class="flow-step-badge">5</div>
+              <div class="flow-step-title">Build Release AAB</div>
+              <div class="flow-step-desc">أمر <code>flutter build appbundle --release</code> لإنتاج حزمة <code>.aab</code> مصغرة وموقعة رسمياً.</div>
+            </div>
+            <div class="flow-step-card">
+              <div class="flow-step-badge">6</div>
+              <div class="flow-step-title">Upload via API</div>
+              <div class="flow-step-desc">رفع الحزمة لمسار Internal Testing في Google Play Console عبر Service Account بدون إعلانات أو متصفح.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Prerequisites -->
+      <section class="section-container" id="prerequisites">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">2</div>
+            <h2 class="section-title">المتطلبات الأساسية للبدء</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(1, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 قائمة المتطلبات الأساسية</div>
+          <ul>
+            <li><strong>حساب Google Play Developer Console:</strong> حساب نشط ومفعل مع دفع رسوم التسجيل (25$ لمرة واحدة).</li>
+            <li><strong>مشروع مسجل في Google Cloud Platform:</strong> مربوط بنفس المنظمة أو البريد الإلكتروني.</li>
+            <li><strong>اسم حزمة التطبيق (Package Name / Application ID):</strong> مثل: <code class="dyn-pkg">com.codebyte.mondera</code> ويجب أن يكون متطابقاً في <code>android/app/build.gradle.kts</code> و <code>AndroidManifest.xml</code> و Google Play Console.</li>
+            <li><strong>مستودع المشروع على GitHub:</strong> مع صلاحية تعديل الـ Settings وإضافة الـ Secrets.</li>
+          </ul>
+
+          <div class="alert alert-warning">
+            <div class="alert-icon">⚠️</div>
+            <div>
+              <strong>ملاحظة في غاية الأهمية (شرط جوجل الإلزامي):</strong><br>
+              لا تسمح Google Play API إطلاقاً برفع أول نسخة من التطبيق عبر الـ API. يجب رفع ملف <code>.aab</code> الأول <strong>يدوياً لمرة واحدة فقط</strong> عبر متصفح الويب في Google Play Console (داخل مسار Internal Testing مثلاً) لإتمام تهيئة مسار التوقيع وتأكيد الاسم وحجم التطبيق، وبعد ذلك ستعمل الأتمتة للأبد!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Service Account JSON -->
+      <section class="section-container" id="service-account">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">3</div>
+            <h2 class="section-title">إنشاء حساب خدمة Google Cloud واستخراج مفتاح الـ JSON</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(2, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            حساب الخدمة (Service Account) هو هوية برمجية تسمح لـ GitHub Actions بالتواصل المباشر والآمن مع Google Play Console لرفع الحزم دون الحاجة إلى إدخال اسم مستخدم أو كلمة مرور أو رموز OTP:
+          </p>
+
+          <ol>
+            <li>
+              افتح لوحة تحكم <strong><a href="https://console.cloud.google.com" target="_blank" class="link">Google Cloud Console</a></strong>، وتأكد من اختيار مشروع التطبيق المناسب في القائمة العلوية.
+            </li>
+            <li>
+              <strong>تفعيل الـ API:</strong> انتقل إلى صفحة المكتبة وقم بتفعيل <strong>Google Play Android Developer API</strong> عبر الضغط على <strong>Enable</strong>:
+              <br>
+              👉 <a href="https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com" target="_blank" class="link">Google Play Android Developer API Link</a>
+            </li>
+            <li>
+              انتقل لصفحة حسابات الخدمة عبر القائمة الجانبية:
+              <br>
+              👉 <strong>IAM &amp; Admin > Service Accounts</strong>
+            </li>
+            <li>
+              اضغط على زر <strong><code>+ Create Service Account</code></strong>:
+              <ul>
+                <li><strong>Service account name:</strong> <code>play-store-actions</code></li>
+                <li><strong>Service account ID:</strong> سيتم توليده تلقائياً.</li>
+                <li>اضغط <strong>Create and continue</strong>.</li>
+                <li>في حقل الدور (Role): اختر <strong>Basic > Editor</strong> (أو <strong>Service Account User</strong>).</li>
+                <li>اضغط <strong>Done</strong>.</li>
+              </ul>
+            </li>
+            <li>
+              ستلاحظ ظهور الحساب في الجدول، انسخ عنوان البريد الإلكتروني الخاص به (مثال: <code>play-store-actions@&lt;project-id&gt;.iam.gserviceaccount.com</code>) لأننا سنمنحه الصلاحيات في الخطوة القادمة.
+            </li>
+            <li>
+              اضغط على النقاط الثلاث <strong>⋮ (Actions)</strong> في أقصى اليمين لنفس الحساب > واختر <strong>Manage keys</strong>.
+            </li>
+            <li>
+              اضغط <strong>Add Key</strong> > <strong>Create new key</strong> > اختر نوع المفتاح <strong>JSON</strong> واضغط <strong>Create</strong>.
+            </li>
+          </ol>
+
+          <div class="alert alert-tip">
+            <div class="alert-icon">💡</div>
+            <div>
+              <strong>تم تحميل ملف الـ JSON بنجاح:</strong> سيتم تنزيل ملف بامتداد <code>.json</code> على جهازك. احتفظ به جيداً وبسرية تامة، لأن هذا الملف يحتوي على المفتاح الخاص للتواصل مع Google Play.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Google Play Permissions -->
+      <section class="section-container" id="play-permissions">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">4</div>
+            <h2 class="section-title">ربط حساب الخدمة وإعطاء الصلاحيات في Google Play Console</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(3, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            بعد إنشاء الحساب في Google Cloud، يجب ربطه داخل Google Play Console ومنحه إذن رفع الإصدارات للتطبيق المحدد:
+          </p>
+
+          <ol>
+            <li>افتح لوحة تحكم <strong><a href="https://play.google.com/console" target="_blank" class="link">Google Play Console</a></strong>.</li>
+            <li>من القائمة الجانبية في الصفحة الرئيسية، اختر <strong>المستخدمون والأذونات (Users and permissions)</strong>.</li>
+            <li>اضغط على زر <strong>دعوة مستخدمين جدد (Invite new users)</strong>.</li>
+            <li>
+              في خانة البريد الإلكتروني (Email Address): الصق إيميل حساب الخدمة الذي نسخته سابقاً:
+              <br>
+              <code>play-store-actions@&lt;project-id&gt;.iam.gserviceaccount.com</code>
+            </li>
+            <li>
+              في تبويب <strong>أذونات التطبيق (App permissions)</strong>:
+              <ul>
+                <li>اضغط على <strong>إضافة تطبيق (Add app)</strong> وحدد تطبيقك (<span class="dyn-pkg">com.codebyte.mondera</span>).</li>
+                <li>فعّل الصلاحيات التالية:
+                  <ul>
+                    <li><strong>إنشاء وتعديل الإصدارات في المسارات الاختبارية (Create &amp; edit releases to testing tracks)</strong></li>
+                    <li><strong>طرح الإصدارات في المسارات الاختبارية (Release to testing tracks)</strong></li>
+                    <li><strong>طرح الإصدارات في الإنتاج (Release to production)</strong> <em>(اختياري إذا أردت الرفع المباشر للمتجر)</em></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>اضغط على زر <strong>إرسال الدعوة (Invite user)</strong> في أسفل الصفحة.</li>
+          </ol>
+
+          <div class="alert alert-info">
+            <div class="alert-icon">ℹ️</div>
+            <div>
+              <strong>ملاحظة التزامن:</strong> قد يستغرق سريان الصلاحيات في Google Play Console ما بين 5 إلى 15 دقيقة بعد الإضافة لتتعرف عليها واجهات الـ API.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Keystore Signing -->
+      <section class="section-container" id="keystore-signing">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">5</div>
+            <h2 class="section-title">ملف التوقيع Keystore (.jks) والتشفير إلى Base64</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(4, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            تتطلب تطبيقات أندرويد توقيع كل حزمة Release بمفتاح تشفيري خاص (Keystore). لضمان الأمان، لا نرفع ملف المفتاح أبداً إلى GitHub، بل نقوم بتحويله إلى نص مشفر (Base64) ونضعه كـ Secret.
+          </p>
+
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('tab-existing-key', this)">أ) إذا كان لديك ملف Keystore جاهز</button>
+            <button class="tab-btn" onclick="switchTab('tab-create-key', this)">ب) إنشاء ملف Keystore جديد من الصفر</button>
+          </div>
+
+          <!-- Tab 1: Existing Keystore -->
+          <div id="tab-existing-key" class="tab-pane active">
+            <p>نفذ الأمر التالي في مجلد المشروع لتحويل ملف الـ Keystore الحالي إلى نص مشفر Base64 في سطر واحد:</p>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang">macOS / Linux Terminal</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+              </div>
+              <pre><code class="code-content">base64 -i android/app/keystore.jks | tr -d '\r\n' > android_keystore_base64.txt</code></pre>
+            </div>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang">Windows PowerShell</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+              </div>
+              <pre><code class="code-content">[Convert]::ToBase64String([IO.File]::ReadAllBytes("android/app/keystore.jks")) | Out-File -Encoding ASCII android_keystore_base64.txt</code></pre>
+            </div>
+            <p>سيتم إنشاء ملف باسم <code>android_keystore_base64.txt</code>، افتحه وانسخ كل محتواه.</p>
+          </div>
+
+          <!-- Tab 2: Create New Keystore -->
+          <div id="tab-create-key" class="tab-pane">
+            <p>إذا كان هذا تطبيقاً جديداً بالكامل، يمكنك إنشاء ملف Keystore جديد رسمي ومخصص للتطبيق عبر أداة <code>keytool</code>:</p>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang">Terminal (Keytool Command)</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+              </div>
+              <pre><code class="code-content">keytool -genkey -v -keystore android/app/keystore.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias <span class="dyn-alias">upload</span> \
+  -storepass <span class="dyn-storepass">MyStrongStorePass123</span> \
+  -keypass <span class="dyn-keypass">MyStrongKeyPass123</span></code></pre>
+            </div>
+
+            <p>بعد إنشائه، قم بتشفيره كما في الخيار (أ) وانسخ الناتج.</p>
+          </div>
+
+          <div class="alert alert-danger">
+            <div class="alert-icon">🚨</div>
+            <div>
+              <strong>تحذير أمني صارم:</strong><br>
+              لا تقم برفع ملف <code>keystore.jks</code> أو <code>android_keystore_base64.txt</code> إلى مستودع الـ Git أبداً! تأكد من إضافة <code>*.jks</code> و <code>*_base64.txt</code> إلى ملف <code>.gitignore</code>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GitHub Secrets -->
+      <section class="section-container" id="github-secrets">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">6</div>
+            <h2 class="section-title">إضافة المفاتيح السرية في GitHub Secrets</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(5, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            انتقل إلى مستودع تطبيقك على GitHub وتوجه إلى:
+            <br>
+            <strong>Settings</strong> > <strong>Secrets and variables</strong> > <strong>Actions</strong> > واضغط على زر <strong>New repository secret</strong>:
+          </p>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم المفتاح السري (Secret Name)</th>
+                  <th>الوصف ومصدر القيمة المطلوبة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>ANDROID_KEYSTORE_BASE64</code></td>
+                  <td>المحتوى النصي الكامل لملف <code>android_keystore_base64.txt</code> الذي قمنا بتشفيره.</td>
+                </tr>
+                <tr>
+                  <td><code>ANDROID_STORE_PASSWORD</code></td>
+                  <td>كلمة سر مخزن المفاتيح (القيمة الحالية المحددة: <code class="dyn-storepass">MyStrongStorePass123</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>ANDROID_KEY_ALIAS</code></td>
+                  <td>اسم المفتاح داخل الـ Keystore (القيمة الحالية المحددة: <code class="dyn-alias">upload</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>ANDROID_KEY_PASSWORD</code></td>
+                  <td>كلمة سر المفتاح الخاص (القيمة الحالية المحددة: <code class="dyn-keypass">MyStrongKeyPass123</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>PLAY_STORE_JSON_KEY</code></td>
+                  <td>محتوى ملف الـ <code>.json</code> الذي قمنا بتنزيله من Google Cloud Service Account بالكامل وبنفس تنسيقه.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Project Configuration -->
+      <section class="section-container" id="project-config">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">7</div>
+            <h2 class="section-title">تهيئة ملفات المشروع (build.gradle.kts &amp; key.properties)</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(6, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            لكي يتعرف Gradle على مفاتيح التوقيع في السيرفر دون كتابة كلمات السر في الكود، نقوم بتهيئة <code>android/app/build.gradle.kts</code> (أو <code>build.gradle</code>) لقراءة الإعدادات من ملف <code>key.properties</code>:
+          </p>
+
+          <div class="card-title">1) ملف <code>android/app/build.gradle.kts</code> (صيغة Kotlin DSL الحديثة):</div>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang">Kotlin (build.gradle.kts)</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+            </div>
+            <pre><code class="code-content">import java.util.Properties
+import java.io.FileInputStream
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace = "<span class="dyn-pkg">com.codebyte.mondera</span>"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    defaultConfig {
+        applicationId = "<span class="dyn-pkg">com.codebyte.mondera</span>"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = if (keystorePropertiesFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+}</code></pre>
+          </div>
+
+          <div class="card-title" style="margin-top: 24px;">2) ملف <code>android/.gitignore</code>:</div>
+          <p>تأكد من وجود الأسطر التالية داخل <code>android/.gitignore</code> لمنع تسريب بيانات التوقيع المحلية:</p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang">.gitignore</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+            </div>
+            <pre><code class="code-content">key.properties
+*.jks
+*.keystore
+*_base64.txt</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: The Complete Workflow File -->
+      <section class="section-container" id="workflow-file">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">8</div>
+            <h2 class="section-title">ملف سير العمل الكامل (.github/workflows/deploy_android.yml)</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(7, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            أنشئ الملف في المسار: <code>.github/workflows/deploy_android.yml</code> داخل مشروعك، والصق الكود التالي:
+          </p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang">YAML (.github/workflows/deploy_android.yml)</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الكود الكامل</button>
+            </div>
+            <pre><code class="code-content">name: Deploy Android to Google Play Store
+
+on:
+  push:
+    branches:
+      - release
+  pull_request:
+    branches:
+      - release
+  workflow_dispatch:
+    inputs:
+      custom_build_number:
+        description: 'رقم إصدار محدد يدوياً (اختياري - اتركه فارغاً للزيادة التلقائية)'
+        required: false
+        default: ''
+
+jobs:
+  deploy:
+    name: Build & Upload to Google Play
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Calculate Version & Auto-Increment Build Number
+        id: versioning
+        run: |
+          RAW_VERSION=$(grep '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*//')
+          VERSION_NAME=$(echo "$RAW_VERSION" | cut -d'+' -f1)
+          BASE_BUILD=$(echo "$RAW_VERSION" | cut -d'+' -f2)
+
+          if [ -z "$BASE_BUILD" ] || [ "$BASE_BUILD" = "$VERSION_NAME" ]; then
+            BASE_BUILD=100
+          fi
+
+          CUSTOM_BUILD="${{ inputs.custom_build_number }}"
+          if [ -n "$CUSTOM_BUILD" ]; then
+            BUILD_NUMBER="$CUSTOM_BUILD"
+          else
+            BUILD_NUMBER=$(( BASE_BUILD + GITHUB_RUN_NUMBER ))
+          fi
+
+          sed -i "s/^version:.*/version: $VERSION_NAME+$BUILD_NUMBER/g" pubspec.yaml
+
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "========================================="
+          echo "🚀 Deploying Android Version: $VERSION_NAME (Build $BUILD_NUMBER)"
+          echo "========================================="
+
+      - name: Configure Keystore & Signing Credentials
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          # فك تشفير ملف التوقيع Keystore
+          python3 -c "import base64, os; s = os.environ['ANDROID_KEYSTORE_BASE64'].strip(); s += '=' * (-len(s) % 4); open('android/app/keystore.jks', 'wb').write(base64.b64decode(s))"
+
+          # كتابة ملف key.properties لـ Gradle
+          cat << EOF > android/key.properties
+          storePassword=$ANDROID_STORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=keystore.jks
+          EOF
+          sed -i 's/^[[:space:]]*//' android/key.properties
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Android App Bundle (AAB)
+        run: |
+          flutter build appbundle --release \
+            --build-name="$VERSION_NAME" \
+            --build-number="$BUILD_NUMBER"
+
+      - name: Upload to Google Play (<span class="dyn-track">internal</span>)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: <span class="dyn-pkg">com.codebyte.mondera</span>
+          releaseFiles: build/app/outputs/bundle/release/*.aab
+          track: <span class="dyn-track">internal</span>
+          status: completed</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 9: Branching Strategy -->
+      <section class="section-container" id="branching-strategy">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">9</div>
+            <h2 class="section-title">استراتيجية فرع release والتشغيل والمتابعة</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(8, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <div class="card">
+          <p>
+            تم ضبط ملف الـ Workflow ليعمل عند دمج الكود في فرع <code>release</code>، مما يمنحك تحكماً كاملاً وحرية أثناء التطوير اليومي دون استهلاك موارد أو إرسال نسخ غير جاهزة إلى المتجر:
+          </p>
+
+          <div class="card-title">1) دورة النشر التلقائي عبر Git:</div>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang">Git Release Flow</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الأوامر</button>
+            </div>
+            <pre><code class="code-content"># 1. التبديل إلى فرع release
+git checkout release
+
+# 2. دمج التعديلات من فرع التطوير
+git merge main
+
+# 3. دفع التعديلات لتشغيل الـ CI/CD فوراً
+git push origin release</code></pre>
+          </div>
+
+          <div class="card-title" style="margin-top: 24px;">2) التشغيل اليدوي (Manual Dispatch):</div>
+          <p>
+            يمكنك دائماً رفع التطبيق بضغطة زر من واجهة GitHub:
+            <br>
+            انتقل إلى تبويب <strong>Actions</strong> > اختر <strong>Deploy Android to Google Play Store</strong> من القائمة الجانبية > اضغط <strong>Run workflow</strong> > يمكنك إدخال <code>custom_build_number</code> محدد إذا رغبت، أو تركه فارغاً لتتولى الخوارزمية حسابه تلقائياً.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 10: Troubleshooting -->
+      <section class="section-container" id="troubleshooting">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="step-number">10</div>
+            <h2 class="section-title">دليل استكشاف الأخطاء وحلولها (Troubleshooting &amp; FAQ)</h2>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(9, this)"><span>✓</span> تم الإنجاز</button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-box">
+          <input type="text" id="trouble-search" class="search-input" placeholder="ابحث عن الخطأ الذي يواجهك (مثال: Google Play API, Keystore, Version Code)..." oninput="filterTroubles()">
+        </div>
+
+        <div id="troubles-list">
+          <div class="trouble-item">
+            <div class="trouble-title">❌ Google Play Android Developer API has not been used in project before or it is disabled</div>
+            <div class="trouble-solution">
+              <strong>السبب:</strong> واجهة الـ API غير مفعلة داخل مشروع Google Cloud.<br>
+              <strong>الحل:</strong> ادخل على <a href="https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com" target="_blank" class="link">رابط الـ API في Cloud Console</a> واضغط على <strong>Enable</strong>، ثم انتظر 5 دقائق وأعد تشغيل الـ Workflow.
+            </div>
+          </div>
+
+          <div class="trouble-item">
+            <div class="trouble-title">❌ The caller does not have permission for the requested application</div>
+            <div class="trouble-solution">
+              <strong>السبب:</strong> إيميل الـ Service Account لم تتم دعوته في Google Play Console، أو لم يتم منحه صلاحية تطبيقك المحدد.<br>
+              <strong>الحل:</strong> اذهب لـ Play Console > المستخدمون والأذونات > تأكد من وجود إيميل حساب الخدمة وتحت تبويب "أذونات التطبيق" قم بإضافة تطبيقك وتفعيل صلاحية "Releases".
+            </div>
+          </div>
+
+          <div class="trouble-item">
+            <div class="trouble-title">❌ Cannot upload initial release using the API. Please upload the first APK/AAB manually</div>
+            <div class="trouble-solution">
+              <strong>السبب:</strong> سياسة Google Play تمنع رفع أول إصدار عبر الـ API للتطبيقات الجديدة.<br>
+              <strong>الحل:</strong> قم ببناء التطبيق محلياً <code>flutter build appbundle --release</code> وارفعه <strong>يدوياً لمرة واحدة فقط</strong> عبر متصفح الويب في المسار التجريبي الداخلي (Internal Testing). بعد إتمام الرفع اليدوي الأول، ستعمل الـ Actions بنجاح تلقائياً.
+            </div>
+          </div>
+
+          <div class="trouble-item">
+            <div class="trouble-title">❌ Version code XX has already been used for this package</div>
+            <div class="trouble-solution">
+              <strong>السبب:</strong> رقم الـ <code>Build Number / Version Code</code> مستخدم مسبقاً في مسار بالمتجر.<br>
+              <strong>الحل:</strong> قم بزيادة رقم الإصدار في <code>pubspec.yaml</code> (مثلاً <code>1.0.0+150</code>) أو عند تشغيل الـ Workflow يدوياً اكتب رقماً أعلى في حقل <code>custom_build_number</code>.
+            </div>
+          </div>
+
+          <div class="trouble-item">
+            <div class="trouble-title">❌ Keystore was tampered with, or password was incorrect</div>
+            <div class="trouble-solution">
+              <strong>السبب:</strong> خطأ في كلمة سر الـ Store أو الـ Key أو تلف في نص الـ Base64 أثناء النسخ.<br>
+              <strong>الحل:</strong> تأكد من عدم وجود مسافات فارغة أو أسطر مقطوعة في <code>ANDROID_KEYSTORE_BASE64</code>، وتأكد من مطابقة <code>ANDROID_STORE_PASSWORD</code> و <code>ANDROID_KEY_PASSWORD</code> للمفتاح الأصلي.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Copy to clipboard with toast notification
+    function copyCode(button) {
+      const codeWrapper = button.closest('.code-wrapper');
+      const codeContent = codeWrapper.querySelector('.code-content');
+      const textToCopy = codeContent.innerText;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("✓ تم نسخ الكود بنجاح إلى الحافظة!");
+        const originalText = button.innerText;
+        button.innerText = "تم النسخ!";
+        button.style.background = "var(--android-green)";
+        button.style.color = "#070d18";
+        setTimeout(() => {
+          button.innerText = originalText;
+          button.style.background = "";
+          button.style.color = "";
+        }, 2000);
+      }).catch(err => {
+        showToast("❌ تعذر النسخ التلقائي، يمكنك نسخه يدوياً");
+      });
+    }
+
+    // Toast Manager
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Mobile Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    // Tab Switcher
+    function switchTab(tabId, button) {
+      const parent = button.closest('.card');
+      const tabs = parent.querySelectorAll('.tab-pane');
+      const buttons = parent.querySelectorAll('.tab-btn');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      const activeTab = document.getElementById(tabId);
+      if (activeTab) activeTab.classList.add('active');
+      button.classList.add('active');
+    }
+
+    // Dynamic Variables Updater
+    const inputPkg = document.getElementById('input-pkg');
+    const inputAlias = document.getElementById('input-alias');
+    const inputStorepass = document.getElementById('input-storepass');
+    const inputKeypass = document.getElementById('input-keypass');
+    const inputTrack = document.getElementById('input-track');
+
+    function updateDynamicVariables() {
+      const pkg = inputPkg.value.trim() || 'com.example.app';
+      const alias = inputAlias.value.trim() || 'upload';
+      const storepass = inputStorepass.value.trim() || 'YOUR_STORE_PASSWORD';
+      const keypass = inputKeypass.value.trim() || 'YOUR_KEY_PASSWORD';
+      const track = inputTrack.value.trim() || 'internal';
+
+      document.querySelectorAll('.dyn-pkg').forEach(el => el.innerText = pkg);
+      document.querySelectorAll('.dyn-alias').forEach(el => el.innerText = alias);
+      document.querySelectorAll('.dyn-storepass').forEach(el => el.innerText = storepass);
+      document.querySelectorAll('.dyn-keypass').forEach(el => el.innerText = keypass);
+      document.querySelectorAll('.dyn-track').forEach(el => el.innerText = track);
+    }
+
+    inputPkg.addEventListener('input', updateDynamicVariables);
+    inputAlias.addEventListener('input', updateDynamicVariables);
+    inputStorepass.addEventListener('input', updateDynamicVariables);
+    inputKeypass.addEventListener('input', updateDynamicVariables);
+    inputTrack.addEventListener('input', updateDynamicVariables);
+
+    // Checklist & Progress Tracker
+    const totalSteps = 10;
+    let completedSteps = JSON.parse(localStorage.getItem('android_cicd_completed_steps') || '{}');
+
+    function updateProgress() {
+      const completedCount = Object.keys(completedSteps).filter(k => completedSteps[k]).length;
+      const percentage = Math.round((completedCount / totalSteps) * 100);
+
+      document.getElementById('progress-percent').innerText = percentage + '%';
+      document.getElementById('progress-fill').style.width = percentage + '%';
+    }
+
+    function toggleStep(stepIndex, btn) {
+      if (completedSteps[stepIndex]) {
+        delete completedSteps[stepIndex];
+        btn.classList.remove('completed');
+        btn.innerHTML = '<span>✓</span> تم الإنجاز';
+      } else {
+        completedSteps[stepIndex] = true;
+        btn.classList.add('completed');
+        btn.innerHTML = '<span>✓</span> مكتمل';
+        showToast("🎉 رائع! تم إنجاز هذه الخطوة بنجاح");
+      }
+      localStorage.setItem('android_cicd_completed_steps', JSON.stringify(completedSteps));
+      updateProgress();
+    }
+
+    // Restore step state on load
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.step-check-btn').forEach((btn, idx) => {
+        if (completedSteps[idx]) {
+          btn.classList.add('completed');
+          btn.innerHTML = '<span>✓</span> مكتمل';
+        }
+      });
+      updateProgress();
+      updateDynamicVariables();
+    });
+
+    // Troubleshooting filter
+    function filterTroubles() {
+      const query = document.getElementById('trouble-search').value.toLowerCase();
+      const items = document.querySelectorAll('.trouble-item');
+
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(query)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // ScrollSpy for Active Sidebar Links
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.section-container');
+      const navItems = document.querySelectorAll('.nav-item');
+      let currentSectionId = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (window.scrollY >= sectionTop) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        const link = item.querySelector('a');
+        if (link && link.getAttribute('href') === '#' + currentSectionId) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
   <img src="https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS" />
   <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
+  <img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" alt="Google Play" />
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions" />
   <img src="https://img.shields.io/badge/Meta_For_Developers-0668E1?style=for-the-badge&logo=meta&logoColor=white" alt="Meta" />
   <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License" />
@@ -17,8 +18,9 @@
 مستودع شامل ومخصص لمطوري تطبيقات الموبايل وفرق العمل التقنية. يحتوي على أدلة تقنية مفصلة، ملفات إعداد جاهزة للإنتاج (Production-ready Configurations)، وسير عمل مؤتمتة (CI/CD Pipelines) تهدف إلى توفير مئات الساعات في إعداد ونشر وتتبع تطبيقات الهواتف الذكية:
 
 1. **أتمتة النشر الكامل على متجر أبل (App Store & TestFlight CI/CD)** عبر GitHub Actions بدون الحاجة لجهاز ماك محلي عند النشر.
-2. **الربط المتكامل لـ Facebook SDK & Meta App Events** لتتبع حملات التثبيت الإعلانية (App Install Ads) والأحداث المخصصة داخل التطبيق.
-3. **توجيهات مخصصة لمساعدي الذكاء الاصطناعي (AI Coding Agents)** لتنفيذ العمليات البرمجية بشكل مستقل ودقيق في أي مشروع فلاتر.
+2. **أتمتة النشر الكامل على متجر جوجل بلاي (Google Play Store & Internal Testing CI/CD)** عبر GitHub Actions لبناء وتوقيع حزم Android App Bundle (`.aab`) وزيادة أرقام الإصدارات تلقائياً.
+3. **الربط المتكامل لـ Facebook SDK & Meta App Events** لتتبع حملات التثبيت الإعلانية (App Install Ads) والأحداث المخصصة داخل التطبيق.
+4. **توجيهات مخصصة لمساعدي الذكاء الاصطناعي (AI Coding Agents)** لتنفيذ العمليات البرمجية بشكل مستقل ودقيق في أي مشروع فلاتر.
 
 ---
 
@@ -28,20 +30,26 @@
 configuration-Apps/
 │
 ├── 📁 "ci cd apple and google "/
+│   ├── 📁 android/
+│   │   ├── 📄 deploy_android.yml                  # سير عمل رفع حزم AAB إلى Google Play Store تلقائياً
+│   │   ├── 📘 ANDROID_CI_CD_PLAY_STORE_GUIDE.md    # الدليل الشامل والمفصل خطوة بخطوة باللغة العربية
+│   │   ├── 🌐 index.html                          # توثيق تفاعلي مرئي بتصميم عصري وخاص بـ Android
+│   │   └── 🌐 android_playstore_github_actions_guide.html
+│   │
 │   └── 📁 ios/
 │       └── 📁 workflows/
-│           ├── 📄 deploy_ios.yml                      # ملف سير العمل الجاهز للرفع لـ App Store / TestFlight
-│           ├── 📘 IOS_CI_CD_APP_STORE_GUIDE.md        # الدليل الشامل والمفصل خطوة بخطوة باللغة العربية
-│           ├── 🌐 index.html                          # توثيق تفاعلي مرئي بتصميم عصري
+│           ├── 📄 deploy_ios.yml                  # ملف سير العمل الجاهز للرفع لـ App Store / TestFlight
+│           ├── 📘 IOS_CI_CD_APP_STORE_GUIDE.md    # الدليل الشامل والمفصل خطوة بخطوة باللغة العربية
+│           ├── 🌐 index.html                      # توثيق تفاعلي مرئي بتصميم عصري
 │           └── 🌐 ios_appstore_github_actions_guide.html
 │
 ├── 📁 "facebook install button on ads"/
-│   ├── 📘 FACEBOOK_SDK_DEVELOPER_GUIDE.md    # الدليل الشامل لربط Meta SDK في Flutter (Android + iOS)
-│   ├── 🤖 FACEBOOK_SDK_AI_PROMPT_GUIDE.md     # برومبت احترافي جاهز للذكاء الاصطناعي لتنفيذ الربط ذاتياً
-│   ├── 🌐 FACEBOOK_SDK_GUIDE.html             # صفحة ويب تفاعلية إرشادية وتوثيق مرئي للمطورين
+│   ├── 📘 FACEBOOK_SDK_DEVELOPER_GUIDE.md        # الدليل الشامل لربط Meta SDK في Flutter (Android + iOS)
+│   ├── 🤖 FACEBOOK_SDK_AI_PROMPT_GUIDE.md         # برومبت احترافي جاهز للذكاء الاصطناعي لتنفيذ الربط ذاتياً
+│   ├── 🌐 FACEBOOK_SDK_GUIDE.html                 # صفحة ويب تفاعلية إرشادية وتوثيق مرئي للمطورين
 │   └── 🌐 index.html
 │
-└── 📄 README.md                               # الفهرس والدليل العام للمستودع
+└── 📄 README.md                                   # الفهرس والدليل العام للمستودع
 ```
 
 ---
@@ -59,11 +67,27 @@ configuration-Apps/
 - **Secure Keychain Handling:** إنشاء Keychain مشفر مؤقت داخل سيرفر الماك في GitHub لتركيب الشهادة التوزيعية (`Apple Distribution .p12`) وملف الـ Provisioning Profile وحذفه فور الانتهاء.
 - **Ready-to-use Workflow:** ملف جاهز بالكامل [`deploy_ios.yml`](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/ios/workflows/deploy_ios.yml).
 
-> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل إعداد CI/CD لنشر تطبيقات Flutter](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/ios/workflows/IOS_CI_CD_APP_STORE_GUIDE.md).
+> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل إعداد CI/CD لنشر تطبيقات Flutter على App Store](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/ios/workflows/IOS_CI_CD_APP_STORE_GUIDE.md) أو تصفح [الدليل التفاعلي المرئي (HTML)](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/ios/workflows/index.html).
 
 ---
 
-### 2️⃣ ربط Facebook SDK وتتبع إعلانات التثبيت (Meta App Events)
+### 2️⃣ أتمتة الرفع لـ Google Play Store (Android CI/CD)
+📂 **المسار:** [`ci cd apple and google /android`](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/android)
+
+سير عمل متكامل وسريع للغاية يعمل على خوادم Linux المجانية (`ubuntu-latest`) في GitHub Actions، يقوم ببناء حزم أندرويد الحديثة (`.aab`) وتوقيعها بمفاتيح Release، ثم رفعها مباشرة إلى مسارات الاختبار في Google Play Console (مثل Internal Testing أو Production) بدون أي تدخل يدوي.
+
+#### ✨ أبرز المميزات:
+- **Fast & Free Linux Runners:** يعمل على بيئة `ubuntu-latest` فائقة السرعة بدون استهلاك دقائق الماك المكلفة.
+- **Auto-Increment Version Code:** يقرأ الإصدار من `pubspec.yaml` ويقوم بزيادة رقم البناء (Build Number / Version Code) تلقائياً مع كل عملية بناء لتفادي خطأ تكرار الإصدارات في Google Play.
+- **Secure Keystore & Credentials:** حفظ ملف التوقيع Keystore مشفراً كـ Secret في GitHub وفك تشفيره لحظياً أثناء البناء، مع توليد ملف `key.properties` مؤقتاً وحذفه فوراً عند انتهاء السيرفر.
+- **Service Account API Authorization:** استخدام حساب خدمة Google Cloud الرسمي (`.json`) لرفع الحزم مباشرة دون الحاجة للتحقق بخطوتين أو تسجيل الدخول اليدوي.
+- **Ready-to-use Workflow:** ملف جاهز بالكامل [`deploy_android.yml`](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/android/deploy_android.yml).
+
+> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل إعداد CI/CD لنشر تطبيقات Flutter على Google Play](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/android/ANDROID_CI_CD_PLAY_STORE_GUIDE.md) أو تصفح [الدليل التفاعلي المرئي (HTML)](file:///Users/mohamedgaber/projects/configuration%20Apps/ci%20cd%20apple%20and%20google%20/android/index.html).
+
+---
+
+### 3️⃣ ربط Facebook SDK وتتبع إعلانات التثبيت (Meta App Events)
 📂 **المسار:** [`facebook install button on ads`](file:///Users/mohamedgaber/projects/configuration%20Apps/facebook%20install%20button%20on%20ads)
 
 دليل هندسي متكامل لربط تطبيق Flutter بمنصة **Meta for Developers** لتفعيل زر التثبيت في الإعلانات الموجهة وحساب تكلفة التثبيت (CPI) وتتبع مسار العميل داخل التطبيق.
@@ -75,7 +99,7 @@ configuration-Apps/
 - **خدمة فلاتر موحدة:** كود Dart احترافي لكلاس `FacebookEventsService` لإرسال الأحداث الأساسية والمخصصة (Registration, Purchase, ViewContent).
 - **AI Agent Directive:** ملف [`FACEBOOK_SDK_AI_PROMPT_GUIDE.md`](file:///Users/mohamedgaber/projects/configuration%20Apps/facebook%20install%20button%20on%20ads/FACEBOOK_SDK_AI_PROMPT_GUIDE.md) مصمم خصيصاً لإعطائه لأي أداة ذكاء اصطناعي (Cursor / Claude / Antigravity) لتنفيذ الربط بشكل ذاتي بدون أخطاء.
 
-> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل ربط Facebook SDK للمطورين](file:///Users/mohamedgaber/projects/configuration%20Apps/facebook%20install%20button%20on%20ads/FACEBOOK_SDK_DEVELOPER_GUIDE.md).
+> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل ربط Facebook SDK للمطورين](file:///Users/mohamedgaber/projects/configuration%20Apps/facebook%20install%20button%20on%20ads/FACEBOOK_SDK_DEVELOPER_GUIDE.md) أو تصفح [الدليل التفاعلي المرئي (HTML)](file:///Users/mohamedgaber/projects/configuration%20Apps/facebook%20install%20button%20on%20ads/FACEBOOK_SDK_GUIDE.html).
 
 ---
 
@@ -85,17 +109,31 @@ configuration-Apps/
 > **لا تقم أبداً برفع ملفات الشهادات أو المفاتيح الحقيقية إلى Git مباشرة.**
 
 جميع مسارات العمل في هذا المستودع تعتمد على **GitHub Secrets** المشفرة:
-- **`APP_STORE_CONNECT_PRIVATE_KEY`**: مفتاح الـ API بصيغة AuthKey.
-- **`APP_STORE_CONNECT_KEY_ID`** و **`APP_STORE_CONNECT_ISSUER_ID`**.
-- **`BUILD_CERTIFICATE_BASE64`**: شهادة التوزيع مشفرة Base64.
-- **`BUILD_PROVISION_PROFILE_BASE64`**: ملف الـ Provisioning مشفر Base64.
-- **`P12_PASSWORD`**: كلمة سر الشهادة.
+
+### 🍏 مفاتيح نظام أبل (iOS Secrets):
+| اسم المفتاح (Secret Name) | الوصف |
+|---|---|
+| `APP_STORE_CONNECT_PRIVATE_KEY` | مفتاح الـ API بصيغة AuthKey (`.p8`) |
+| `APP_STORE_CONNECT_KEY_ID` | معرّف المفتاح من App Store Connect |
+| `APP_STORE_CONNECT_ISSUER_ID` | معرّف المنظمة Issuer ID |
+| `BUILD_CERTIFICATE_BASE64` | شهادة التوزيع (`.p12`) مشفرة Base64 |
+| `BUILD_PROVISION_PROFILE_BASE64` | ملف الـ MobileProvision مشفر Base64 |
+| `P12_PASSWORD` | كلمة سر شهادة التوزيع |
+
+### 🤖 مفاتيح نظام أندرويد (Android Secrets):
+| اسم المفتاح (Secret Name) | الوصف |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | ملف التوقيع `keystore.jks` مشفراً بنص Base64 |
+| `ANDROID_STORE_PASSWORD` | كلمة سر مخزن المفاتيح (`storePassword`) |
+| `ANDROID_KEY_ALIAS` | اسم المفتاح (`keyAlias`) |
+| `ANDROID_KEY_PASSWORD` | كلمة سر المفتاح الخاص (`keyPassword`) |
+| `PLAY_STORE_JSON_KEY` | محتوى ملف Google Cloud Service Account (`.json`) كاملاً |
 
 ---
 
 ## 🗺️ خريطة التطوير القادمة | Upcoming Additions
 
-- [ ] 🤖 **Google Play CI/CD Pipeline:** سير عمل GitHub Actions لرفع حزم Android App Bundle (`.aab`) تلقائياً إلى مسار الاختبار الداخلي في Google Play Console.
+- [x] 🤖 **Google Play CI/CD Pipeline:** سير عمل GitHub Actions لرفع حزم Android App Bundle (`.aab`) تلقائياً إلى مسار الاختبار الداخلي في Google Play Console.
 - [ ] 📊 **TikTok & Snapchat Events SDK:** أدلة ربط وتتبع الإعلانات على المنصات الترويجية الأخرى في تطبيقات Flutter.
 - [ ] 🚀 **Fastlane Integration Template:** نماذج إعداد Fastlane للمشاريع الكبيرة والفرق المتعددة.
 
