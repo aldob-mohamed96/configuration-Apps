@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>تقرير بيانات المتاجر — أبل · جوجل · هواوي</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+  :root {
+    --teal:#149B9B; --navy:#1A4D6D; --bg:#f4f7f7; --border:#e2e8f0;
+    --muted:#64748b; --apple:#111827; --google:#1a73e8; --huawei:#cf0a2c;
+    --ok:#065f46; --okbg:#d1fae5; --opt:#92400e; --optbg:#fef3c7; --req:#9f1239; --reqbg:#ffe4e6;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Tajawal',sans-serif; background:var(--bg); color:#1e293b; line-height:1.75; }
+  a { color:var(--teal); }
+  .hero {
+    background:linear-gradient(135deg,var(--teal),#0D7375 48%,var(--navy));
+    color:#fff; padding:40px 20px 32px; text-align:center;
+  }
+  .hero .kicker { opacity:.85; font-size:12px; letter-spacing:.4px; }
+  .hero h1 { font-size:26px; font-weight:800; margin:8px 0 6px; }
+  .hero p { opacity:.92; font-size:14px; max-width:720px; margin:0 auto; }
+  nav.toc {
+    position:sticky; top:0; z-index:20; background:#fff; border-bottom:1px solid var(--border);
+    display:flex; gap:8px; justify-content:center; flex-wrap:wrap; padding:10px 12px;
+  }
+  nav.toc a {
+    text-decoration:none; font-size:13px; font-weight:700; color:var(--navy);
+    background:#f1f5f9; padding:6px 12px; border-radius:999px;
+  }
+  nav.toc a:hover { background:var(--teal); color:#fff; }
+  .wrap { max-width:1080px; margin:0 auto; padding:22px 14px 56px; }
+  .note {
+    background:#fff; border:1px solid var(--border); border-radius:14px;
+    padding:14px 16px; margin-bottom:18px; font-size:13px; color:var(--muted);
+  }
+  .note strong { color:var(--navy); }
+  h2 {
+    font-size:22px; font-weight:800; color:#fff; margin:28px 0 14px;
+    padding:12px 16px; border-radius:12px;
+  }
+  h2.apple { background:linear-gradient(90deg,#111827,#334155); }
+  h2.google { background:linear-gradient(90deg,#1a73e8,#0f9d58); }
+  h2.huawei { background:linear-gradient(90deg,#cf0a2c,#7f1d1d); }
+  h2.compare { background:linear-gradient(90deg,var(--teal),var(--navy)); }
+  h2.shared { background:linear-gradient(90deg,#0f766e,#1A4D6D); }
+  h3 { font-size:16px; font-weight:800; color:var(--navy); margin:18px 0 8px; }
+  .card {
+    background:#fff; border:1px solid var(--border); border-radius:14px;
+    padding:16px 18px; margin-bottom:14px;
+  }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .grid2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .store-card { text-align:center; padding:18px 12px; }
+  .store-card .logo { font-size:28px; font-weight:800; }
+  .store-card .apple { color:#111827; }
+  .store-card .google { color:#1a73e8; }
+  .store-card .huawei { color:#cf0a2c; }
+  .store-card p { font-size:13px; color:var(--muted); margin-top:6px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { border-bottom:1px solid var(--border); padding:9px 8px; text-align:right; vertical-align:top; }
+  th { background:#f8fafc; color:var(--navy); font-weight:800; }
+  tr:last-child td { border-bottom:none; }
+  .badge {
+    display:inline-block; font-size:11px; font-weight:800; padding:2px 8px;
+    border-radius:999px; white-space:nowrap;
+  }
+  .req { background:var(--reqbg); color:var(--req); }
+  .opt { background:var(--optbg); color:var(--opt); }
+  .upd { background:#e0e7ff; color:#3730a3; }
+  .limit { font-weight:800; color:var(--teal); white-space:nowrap; }
+  ul.tips { padding:0 18px 0 0; font-size:13.5px; }
+  ul.tips li { margin:6px 0; }
+  .how {
+    background:#f8fafc; border:1px dashed var(--border); border-radius:10px;
+    padding:12px 14px; font-size:13.5px; margin:8px 0 0;
+  }
+  .how strong { color:var(--navy); }
+  .size-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
+  .size {
+    background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:12px;
+  }
+  .size b { display:block; color:var(--navy); font-size:13px; }
+  .size span { display:block; font-size:18px; font-weight:800; color:var(--teal); margin:4px 0; }
+  .size small { color:var(--muted); font-size:12px; }
+  .check { list-style:none; }
+  .check li { padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .check li:last-child { border-bottom:none; }
+  .check li::before { content:"☐ "; color:var(--teal); font-weight:800; }
+  .footer { text-align:center; color:var(--muted); font-size:12px; padding:8px 12px 24px; }
+  .src { font-size:12px; color:var(--muted); margin-top:8px; }
+  .copybox {
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:12px 14px;
+    font-size:14px; line-height:1.85; margin:8px 0; white-space:pre-wrap;
+  }
+  .copybox.ltr { direction:ltr; text-align:left; font-family:ui-sans-serif,system-ui,sans-serif; }
+  .meta-row { font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .meta-row b { color:var(--teal); }
+  h2.copysec { background:linear-gradient(90deg,#0f766e,#134e4a); }
+  @media (max-width:860px) {
+    .grid3, .grid2 { grid-template-columns:1fr; }
+    table { font-size:12px; }
+    .hero h1 { font-size:20px; }
+  }
+  @media print {
+    nav.toc { position:static; }
+    h2 { break-after:avoid; }
+    .card { break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="kicker">دليل النشر الاحترافي على المتاجر الثلاثة · App Store · Google Play · AppGallery</div>
+  <h1>الدليل الشامل ونماذج الـ Metadata لرفع أي تطبيق موبايل</h1>
+  <p>كل الحقول والنصوص والصور والحدود القصوى والنماذج الجاهزة المطلوبة في App Store (أبل) و Google Play (جوجل) و AppGallery (هواوي) — مع إرشادات ونماذج جاهزة قابلة للتخصيص لأي تطبيق.</p>
+</header>
+
+<nav class="toc">
+  <a href="#templates">نماذج نصوص جاهزة (Templates)</a>
+  <a href="#compare">مقارنة سريعة</a>
+  <a href="#apple">أبل</a>
+  <a href="#google">جوجل</a>
+  <a href="#huawei">هواوي</a>
+  <a href="#shared">بيانات مشتركة</a>
+  <a href="#write">كيف تكتب</a>
+  <a href="#checklist">قائمة تجهيز</a>
+</nav>
+
+<main class="wrap">
+
+  <div class="note">
+    <strong>نطاق التقرير:</strong> بيانات صفحة المتجر (listing) + الأصول البصرية + بيانات المراجعة والخصوصية المطلوبة قبل أول رفع.
+    الأرقام مأخوذة من وثائق المتاجر الرسمية حتى أغسطس ٢٠٢٦. لوحة المتجر هي المرجع النهائي عند الرفع لأن القواعد قد تتغيّر.
+    <br/><strong>عدّ الحروف:</strong> الحرف العربي يُحسب حرفاً واحداً مثل اللاتيني في الحقول الثلاثة. الإيموجي مرفوض في نصوص أبل، وممنوع في اسم التطبيق على جوجل، ومقبول في وصف جوجل (وقد يستهلك أكثر من حرف).
+  </div>
+
+  <!-- GENERAL APP TEMPLATES & COPY -->
+  <h2 id="templates" class="copysec">نماذج نصوص جاهزة قابلة للتخصيص — نسخ مباشر + إرشادات لكل حقل</h2>
+  <div class="note">
+    <strong>طريقة الاستخدام:</strong> هذه النماذج مصممة لتكون قالباً عاماً ومرناً يناسب أي تطبيق (خدمات، تجارة إلكترونية، حجوزات، منصات تقنية، رعاية ومتابعة). استبدل النصوص بين الأقواس <code>[اسم التطبيق]</code>، <code>[الخدمة الرئيسية]</code>، <code>[بيانات التواصل]</code> بالبيانات الخاصة بتطبيقك.
+    <br/><strong>سياسة المتاجر:</strong> تجنّب في الاسم والوصف القصير عبارات المبالغة ("الأفضل"، "رقم 1")، الأسعار المتغيرة، نسب الخصم المؤقتة، وعبارات الحث على التثبيت مثل "حمّل الآن". التفاصيل الترويجية المؤقتة تُترك داخل التطبيق أو في الحملات الإعلانية.
+  </div>
+
+  <div class="card">
+    <h3>١) اسم التطبيق — App Name</h3>
+    <p class="meta-row">الحد: أبل/جوجل <b>٣٠</b> · هواوي <b>٦٤</b> · يظهر تحت الأيقونة وفي نتائج البحث</p>
+    <p class="meta-row"><b>إرشادات:</b> ضع اسم علامتك التجارية + كلمة مفتاحية تعبر عن القيمة الأساسية. تجنب الإيموجي، السنين، أو كلمة "تطبيق".</p>
+    <div class="copybox">[اسم تطبيقك] — [الخدمة الرئيسية]</div>
+    <p class="meta-row">مثال تطبيقي: <strong>تطبيقك للخدمات السريعة</strong> (٢٢ حرفاً — متوافق مع المتاجر الثلاثة)</p>
+    <div class="copybox ltr">[AppName] - Smart Services</div>
+    <p class="meta-row">للغة الإنجليزية (٢٤ حرفاً)</p>
+    <div class="how">لهواوي يمكن استخدام الاسم الأطول حتى ٦٤ حرفاً: <strong>[اسم تطبيقك] — المنصة الذكية لإدارة وتتبع الخدمات والطلبات</strong>.</div>
+  </div>
+
+  <div class="card">
+    <h3>٢) العنوان الفرعي لأبل — Subtitle</h3>
+    <p class="meta-row">الحد: <b>٣٠</b> · مفهرس في محرك بحث App Store · يظهر أسفل الاسم مباشرة</p>
+    <p class="meta-row"><b>إرشادات:</b> لا تكرر اسم التطبيق هنا. ركّز على المنفعة والفائدة المباشرة للمستخدم.</p>
+    <div class="copybox">خدمات سريعة وسهلة لك ولعائلتك</div>
+    <p class="meta-row">٢٩ حرفاً — مستغل بالكامل</p>
+    <div class="copybox ltr">Fast, easy &amp; reliable services</div>
+    <p class="meta-row">٣٠ حرفاً بالضبط</p>
+  </div>
+
+  <div class="card">
+    <h3>٣) الوصف القصير لجوجل وهواوي — Short / Brief Description</h3>
+    <p class="meta-row">الحد: <b>٨٠</b> · أول نص يقرأه المستخدم في صفحة المتجر قبل زر "المزيد"</p>
+    <p class="meta-row"><b>إرشادات:</b> لخص فيه أهم ٣ خدمات فعلية يقدمها التطبيق. ممنوع وضع إيموجي أو فواصل أسطر جديدة على جوجل.</p>
+    <div class="copybox">منصتك المتكاملة لإدارة طلباتك، حجز الخدمات، وتتبع حسابك بكل سرعة وسهولة وأمان.</div>
+    <p class="meta-row">٧٧ حرفاً</p>
+    <div class="copybox ltr">Your all-in-one platform for fast booking, reliable service, and easy tracking.</div>
+    <p class="meta-row">٧٨ حرفاً</p>
+  </div>
+
+  <div class="card">
+    <h3>٤) النص الترويجي لأبل — Promotional Text</h3>
+    <p class="meta-row">الحد: <b>١٧٠</b> · اختياري · ميزته: يمكن تعديله في أي وقت دون الحاجة لرفع إصدار جديد</p>
+    <p class="meta-row"><b>إرشادات:</b> رسالة إرشادية أو ترحيبية أعلى الوصف في صفحة المتجر. مفيد للعروض الموسمية أو التحديثات الكبرى.</p>
+    <div class="copybox">اكتشف تجربة استثنائية مع [اسم تطبيقك]! احصل على أسرع الخدمات، إدارة سهلة لحسابك، ومزايا حصرية مصممة لتلبية احتياجاتك بكل راحة وأمان.</div>
+    <p class="meta-row">١٣٢ حرفاً — متبقّي مساحة لإعلاناتك الموسمية</p>
+    <div class="copybox ltr">Discover an exceptional experience with [AppName]! Enjoy seamless services, easy account management, and exclusive features crafted for your comfort.</div>
+  </div>
+
+  <div class="card">
+    <h3>٥) كلمات أبل المفتاحية — Keywords</h3>
+    <p class="meta-row">الحد: <b>١٠٠</b> · حقل مخفي مخصص لمحرك بحث App Store · مفصول بفواصل بدون مسافات</p>
+    <p class="meta-row"><b>إرشادات:</b> لا تكرر اسم التطبيق ولا العنوان الفرعي. ركز على الكلمات والمصطلحات التي يكتبها المستخدم في البحث.</p>
+    <div class="copybox">خدمات,حجز,طلب,عروض,دفع,توصيل,إدارة,حساب,متابعة,أونلاين,سريع</div>
+    <div class="copybox ltr">services,booking,order,delivery,offers,payment,account,track,online,fast</div>
+  </div>
+
+  <div class="card">
+    <h3>٦) الوصف الكامل — Full Description</h3>
+    <p class="meta-row">أبل/جوجل: <b>٤٬٠٠٠</b> حرف · هواوي: <b>١٠٠–٨٬٠٠٠</b> حرف · أول ٣ أسطر هي الأهم لأنها تظهر قبل التوسيع</p>
+    <p class="meta-row"><b>إرشادات:</b> ابدأ بمقدمة واضحة ومقنعة، ثم اذكر أهم المزايا بنقاط منظمة، ثم وضح معايير الأمان والتسجيل، واختم ببيانات الدعم والتواصل.</p>
+    <p style="font-size:13px;font-weight:800;color:var(--navy);margin-top:10px">النسخة العربية — صالحة للمتاجر الثلاثة (استبدل ما بين الأقواس)</p>
+    <div class="copybox">مرحباً بك في [اسم التطبيق] — وجهتك المتكاملة لتجربة رقمية ذكية ومميزة تلبي كافة احتياجاتك اليومية بكل سرعة وسهولة.
+
+صُمم التطبيق ليوفر لك حلاً شاملاً يجمع بين الأداء السلس والأمان العالي، مما يتيح لك إنجاز مهامك وإدارة خدماتك بضغطة زر واحدة ومن أي مكان.
+
+✨ أهم المميزات التي يقدمها لك [اسم التطبيق]:
+• تصفح واطلب [الخدمة الرئيسية] بخطوات بسيطة وواجهة استخدام عصرية ومريحة.
+• إشعارات ومتابعة فورية ومباشرة لحالة طلباتك ومواعيدك خطوة بخطوة.
+• خيارات دفع إلكتروني متعددة، آمنة وموثوقة، وتدعم أعلى معايير الحماية والتشفير.
+• سجل كامل لإدارة حسابك الشخصي، تتبع المحفوظات، وإعادة الطلب السريع.
+• عروض حصرية، مكافآت، وخصومات مخصصة لمستخدمي التطبيق.
+
+🔒 الأمان وسهولة الاستخدام:
+• تسجيل سريع ومريح عبر رقم الجوال، البريد الإلكتروني، أو خيارات الدخول الموحد.
+• حماية متقدمة لبياناتك الشخصية وقفل التطبيق عبر المقاييس الحيوية (بصمة الإصبع أو بصمة الوجه).
+• دعم فني متكامل وخدمة عملاء متواجدة لمساعدتكم والرد على كافة استفساراتكم.
+
+📞 تواصل معنا:
+يسعدنا دائماً سماع آرائكم واقتراحاتكم لتطوير التطبيق:
+• الموقع الرسمي: [https://yourdomain.com]
+• البريد الإلكتروني للدعم: [support@yourdomain.com]
+• خدمة العملاء / الدعم: [رقم الهاتف أو الواتساب الرسمي]</div>
+    <p style="font-size:13px;font-weight:800;color:var(--navy);margin-top:10px">English Template (Ready to customize)</p>
+    <div class="copybox ltr">Welcome to [AppName] — your all-in-one digital companion designed to deliver a fast, seamless, and reliable experience for all your daily needs.
+
+Our app is built to provide an intuitive interface and robust performance, empowering you to access top-tier services and manage your requests effortlessly from anywhere.
+
+✨ Key Features of [AppName]:
+• Intuitive Experience: Browse and access [Core Service] in just a few taps with a modern interface.
+• Real-time Tracking: Live status updates and instant notifications for all your requests and orders.
+• Secure Payments: Multiple protected payment gateways ensuring complete peace of mind.
+• Account Management: Easily view your activity history, saved items, and quick reordering.
+• Exclusive Perks: Special rewards, member privileges, and regular feature updates.
+
+🔒 Privacy, Security &amp; Accessibility:
+• Fast and flexible sign-up via phone, email, or Single Sign-On (SSO).
+• Top-level data encryption and biometric app lock support (Face ID / Fingerprint).
+• Dedicated customer support team ready to assist you whenever needed.
+
+📞 Contact &amp; Support:
+We always look forward to your valuable feedback:
+• Official Website: [https://yourdomain.com]
+• Email Support: [support@yourdomain.com]
+• Customer Care: [Your Contact Number or WhatsApp]</div>
+  </div>
+
+  <div class="card">
+    <h3>٧) ما الجديد — What’s New / Release Notes</h3>
+    <p class="meta-row">أبل: <b>٤٬٠٠٠</b> · جوجل: <b>٥٠٠</b> · هواوي: <b>٥٠٠–١٬٠٠٠</b> · مخصص لكل إصدار يُرفع</p>
+    <p class="meta-row"><b>إرشادات:</b> لا تكتب مجرد "إصلاح أخطاء عامة". اذكر ما تم إضافته فعلياً وما يستفيد منه المستخدم.</p>
+    <div class="copybox">الإصدار الأول من [اسم التطبيق]: مرحباً بكم! يسعدنا إطلاق النسخة الرسمية الأولى. يمكنك الآن الاستمتاع بجميع الميزات الأساسية، تصفح الخدمات، إدارة حسابك، وتجربة أداء سلس وسريع.</div>
+    <div class="copybox ltr">Initial release of [AppName]: Welcome! We are thrilled to launch our official first version. Enjoy exploring core services, seamless performance, and easy account management.</div>
+  </div>
+
+  <div class="card">
+    <h3>٨) التصنيف والعمر والخصوصية</h3>
+    <table>
+      <thead><tr><th>الحقل</th><th>القيمة الإرشادية العامة</th><th>ملاحظات وإرشادات</th></tr></thead>
+      <tbody>
+        <tr><td>التصنيف الأساسي</td><td>اختر الفئة المطابقة لنشاطك (مثل: Shopping, Productivity, Utilities, Business, Lifestyle)</td><td>التصنيف الصحيح يساعد في خوارزميات الاقتراح والظهور في المتجر. يمكن اختيار تصنيف ثانوي إن وُجد.</td></tr>
+        <tr><td>التصنيف العمري Age Rating</td><td>٤+ أو ١٢+ وفق نتيجة الاستبيان (IARC / Apple)</td><td>يُحدد بناءً على طبيعة المحتوى. تجنب إدراج أي محتوى غير مناسب، واحرص على الإجابة الدقيقة على الاستبيان.</td></tr>
+        <tr><td>الجمهور المستهدف (جوجل)</td><td>١٨+ أو جمهور عام (١٣+)</td><td>لا تعلن التطبيق لفئة الأطفال (Kids / Families) ما لم يكن تطبيقاً تعليمياً أو ترفيهياً مخصصاً لهم فعلياً، لتجنب سياسات الأطفال الصارمة.</td></tr>
+        <tr><td>هل يحتوي التطبيق إعلانات؟</td><td>لا (إلا إذا كنت تستخدم SDK إعلانات خارجية كـ AdMob)</td><td>الإعلانات أو العروض الداخلية الخاصة بك داخل التطبيق لا تعتبر إعلانات طرف ثالث.</td></tr>
+        <tr><td>سياسة الخصوصية Privacy Policy</td><td>رابط HTTPS رسمي ومتاح للعامة دون تسجيل دخول</td><td>يجب أن يوضح بدقة: البيانات المجمعة، كيفية استخدامها، مشاركتها مع أطراف ثالثة، وطرق طلب حذف الحساب والبيانات.</td></tr>
+        <tr><td>Data Safety / Nutrition Labels</td><td>الإفصاح الدقيق عن البيانات (الاسم، الجوال، البريد، المعرفات، الموقع، الدفع)</td><td>يجب أن تتطابق الإجابات داخل Play Console و App Store Connect تماماً مع ما ورد في سياسة الخصوصية وحزم SDK المستخدمة.</td></tr>
+        <tr><td>حقوق النشر Copyright</td><td>2026 [اسم شركتك أو علامتك التجارية]</td><td>اسم الكيان القانوني أو اسم المطور المسجل رسمياً.</td></tr>
+        <tr><td>رابط الدعم الفني Support URL</td><td>رابط صفحة الدعم أو نموذج التواصل بالموقع</td><td>إلزامي لدى أبل. يجب أن تكون الصفحة مفتوحة وتتضمن بريد الدعم أو رقم تواصل.</td></tr>
+        <tr><td>رابط التسويق Marketing URL</td><td>الموقع الإلكتروني الرسمي للتطبيق</td><td>اختياري لدى أبل ومستحسن لزيادة الموثوقية.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>٩) إرشادات لقطات الشاشة والصور الترويجية (Screenshots &amp; Graphics)</h3>
+    <p class="meta-row">استخدم لقطات حقيقية من واجهات التطبيق، مع شريط حالة نظيف (Clean Status Bar)، وبدون وضع أسعار متغيرة أو عبارات دعائية مثل "الأفضل".</p>
+    <table>
+      <thead><tr><th>#</th><th>الشاشة المقترحة</th><th>النص المقترح أعلى الصورة (Headline)</th><th>الهدف والأهمية</th></tr></thead>
+      <tbody>
+        <tr><td>١</td><td>الشاشة الرئيسية واستعراض الخدمات</td><td>كل خدماتك في تطبيق واحد</td><td>أول صورة تظهر في نتائج البحث وتشرح جوهر التطبيق فوراً.</td></tr>
+        <tr><td>٢</td><td>صفحة تصفح واختيار الخدمة / المنتج</td><td>تصفح سهل وسريع بضغطة زر</td><td>إظهار سهولة الاستخدام وتنوع الخيارات المتاحة.</td></tr>
+        <tr><td>٣</td><td>تفاصيل الطلب أو صفحة الحجز</td><td>خيارات مرنة تناسب احتياجاتك</td><td>توضيح التفاصيل والشفافية في تقديم الخدمة.</td></tr>
+        <tr><td>٤</td><td>خيارات الدفع الإلكتروني والسلة</td><td>دفع إلكتروني آمن ومتعدد</td><td>بناء الثقة وإبراز تنوع وسائل الدفع المدعومة.</td></tr>
+        <tr><td>٥</td><td>شاشة المتابعة والتتبع المباشر</td><td>تتبع فوري ومباشر لطلباتك</td><td>إبراز الشفافية والراحة في متابعة الإنجاز.</td></tr>
+        <tr><td>٦</td><td>الملف الشخصي وإدارة الإعدادات</td><td>إدارة متكاملة لحسابك وإشعاراتك</td><td>تأكيد سهولة إدارة الحساب والتحكم في الخصوصية.</td></tr>
+      </tbody>
+    </table>
+    <div class="how">
+      <strong>صورة الرسم المميز لجوجل بلاي Feature Graphic (١٠٢٤×٥٠٠ بكسل):</strong>
+      خلفية نظيفة مستوحاة من هوية التطبيق البصرية + شعار واسم التطبيق + جملة تسويقية واحدة قصيرة وموجزة. تجنب وضع الأيقونة في الزوايا التي قد تقطعها واجهة المتجر، ولا تضع شعارات المتاجر المنافسة.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>١٠) ملاحظات المراجع — Review Notes (لا تظهر للمستخدم النهائي)</h3>
+    <p class="meta-row"><b>إرشادات:</b> جهّز حساباً تجريبياً نشطاً ومفعلاً مسبقاً لمراجعي أبل وجوجل، مع توضيح رمز الـ OTP إذا كان الدخول برقم الجوال.</p>
+    <div class="copybox ltr">App Overview:
+[AppName] is an application that allows users to [Briefly describe the core value and function of your app].
+
+Reviewer Demo Account Credentials:
+• Username / Mobile: demo_reviewer@yourdomain.com (or test phone number)
+• Password: ReviewerTest2026!
+• OTP / 2FA Code: 123456 (or static verification code configured on backend)
+
+Guest Mode:
+Reviewers can also browse core app features without signing in by tapping "Continue as Guest" on the welcome screen.
+
+Key User Journeys to Test:
+1. Browse services from Home screen.
+2. View item details and proceed to booking / checkout.
+3. Test account settings and profile page.
+
+Support Contact:
+If you need any assistance or special permissions during review, please contact: support@yourdomain.com</div>
+  </div>
+
+  <div class="card">
+    <h3>١١) ما لا يُكتب في المتجر (محاذير تجنب الرفض Rejection Prevention)</h3>
+    <ul class="tips">
+      <li>لا تضع أسعاراً محددة أو نسب خصومات مؤقتة (مثل "خصم 50%") في اسم التطبيق أو الوصف القصير أو لقطات الشاشة.</li>
+      <li>لا تستخدم كلمات المبالغة مثل "أفضل تطبيق"، "رقم 1 في العالم"، أو "الأول" لأنها تسبب الرفض المباشر.</li>
+      <li>لا تضع عبارات الحث على التثبيت مثل "حمّل الآن"، "نزّل التطبيق فوراً"، أو "عرض لفترة محدودة".</li>
+      <li>لا تضع أي إيموجي في اسم التطبيق على متجري أبل وجوجل.</li>
+      <li>لا تذكر منصات المتاجر الأخرى المنافسة (مثال: تجنب كتابة "متوفر الآن على أندرويد" داخل متجر أبل).</li>
+      <li>تأكد من أن جميع الميزات المذكورة في الوصف والصور تعمل فعلياً داخل النسخة المرفوعة وليست شاشات وهمية أو قيد التطوير.</li>
+    </ul>
+  </div>
+
+  <!-- COMPARE -->
+  <h2 id="compare" class="compare">مقارنة سريعة بين المتاجر الثلاثة</h2>
+  <div class="grid3">
+    <div class="card store-card">
+      <div class="logo apple"> App Store</div>
+      <p>App Store Connect · iOS / iPadOS<br/>رسوم حساب: ٩٩ دولار سنوياً</p>
+    </div>
+    <div class="card store-card">
+      <div class="logo google">▶ Google Play</div>
+      <p>Play Console · Android<br/>رسوم حساب: ٢٥ دولار مرة واحدة</p>
+    </div>
+    <div class="card store-card">
+      <div class="logo huawei">Huawei AppGallery</div>
+      <p>AppGallery Connect · أجهزة هواوي<br/>حساب المطوّر: مجاني بعد التحقق من الهوية</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>حدود النصوص الأساسية</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>الحقل</th>
+          <th>أبل</th>
+          <th>جوجل</th>
+          <th>هواوي</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>اسم التطبيق</td>
+          <td class="limit">٢–٣٠ حرف</td>
+          <td class="limit">٣٠ حرف</td>
+          <td class="limit">٣–٦٤ حرف</td>
+        </tr>
+        <tr>
+          <td>عنوان فرعي / وصف قصير</td>
+          <td class="limit">٣٠ حرف (Subtitle)</td>
+          <td class="limit">٨٠ حرف (Short)</td>
+          <td class="limit">٨٠ حرف (Brief) — ١٧ للصينية في بعض الشاشات</td>
+        </tr>
+        <tr>
+          <td>نص ترويجي</td>
+          <td class="limit">١٧٠ حرف (Promotional text)</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>الوصف الكامل</td>
+          <td class="limit">٤٬٠٠٠ حرف</td>
+          <td class="limit">٤٬٠٠٠ حرف</td>
+          <td class="limit">١٠٠–٨٬٠٠٠ حرف</td>
+        </tr>
+        <tr>
+          <td>كلمات مفتاحية مخفية</td>
+          <td class="limit">١٠٠ حرف</td>
+          <td>لا يوجد حقل منفصل (يُفهرس الاسم والوصف)</td>
+          <td>كل الحقول مفهرسة · يُنصح بـ ~١٠٠ حرف إن وُجد الحقل</td>
+        </tr>
+        <tr>
+          <td>ما الجديد / مميزات الإصدار</td>
+          <td class="limit">٤٬٠٠٠ حرف</td>
+          <td class="limit">٥٠٠ حرف (Release notes)</td>
+          <td class="limit">٥٠٠ للصين · ١٬٠٠٠ لباقي المواقع</td>
+        </tr>
+        <tr>
+          <td>لقطات الشاشة</td>
+          <td>١–١٠ لكل حجم جهاز</td>
+          <td>٢–٨ لكل نوع جهاز</td>
+          <td>٣–٨ للموبايل</td>
+        </tr>
+        <tr>
+          <td>الأيقونة في المتجر</td>
+          <td>١٠٢٤×١٠٢٤ PNG</td>
+          <td>٥١٢×٥١٢ PNG · ١ ميجا</td>
+          <td>٢١٦×٢١٦ أو ٥١٢×٥١٢ PNG · ٢ ميجا</td>
+        </tr>
+        <tr>
+          <td>صورة غلاف / Feature</td>
+          <td>لا يوجد إلزامي</td>
+          <td class="limit">١٠٢٤×٥٠٠ إلزامي</td>
+          <td>اختياري (فيديو ترويجي)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- APPLE -->
+  <h2 id="apple" class="apple">١) أبل — App Store Connect</h2>
+
+  <div class="card">
+    <h3>النصوص المعروضة للمستخدم</h3>
+    <table>
+      <thead>
+        <tr><th>الحقل</th><th>إلزامي؟</th><th>الحد</th><th>أين يظهر</th><th>كيف يُكتب</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>اسم التطبيق</strong><br/>App Name</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٢–٣٠</td>
+          <td>تحت الأيقونة في البحث والرسوم والصفحة</td>
+          <td>اسم العلامة + كلمة تصنيف قوية. يُفهرس في البحث. لا إيموجي ولا أسماء منافسين. يُقرأ مع الـ Subtitle كجملة واحدة.</td>
+        </tr>
+        <tr>
+          <td><strong>العنوان الفرعي</strong><br/>Subtitle</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٣٠</td>
+          <td>تحت الاسم في الصفحة والبحث</td>
+          <td>ليس شعاراً تسويقياً فقط — ضع فيه المنفعة الأساسية أو كلمات بحث. مفهرس. مثال: «تأمينك وإدارة وثائقك».</td>
+        </tr>
+        <tr>
+          <td><strong>النص الترويجي</strong><br/>Promotional Text</td>
+          <td><span class="badge opt">اختياري</span> <span class="badge upd">يُعدّل بدون نسخة جديدة</span></td>
+          <td class="limit">١٧٠</td>
+          <td>أعلى الوصف في صفحة المنتج</td>
+          <td>رسالة آنية: عرض، ميزة جديدة، موسم. غير مفهرس. حدّثه بدون انتظار مراجعة نسخة.</td>
+        </tr>
+        <tr>
+          <td><strong>الوصف</strong><br/>Description</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٤٬٠٠٠</td>
+          <td>صفحة المنتج — أول ٣ أسطر هي الأهم</td>
+          <td>للبشر لا لمحرّك البحث. الفقرة الأولى: ماذا يفعل التطبيق ولمن. ثم المزايا، ثم إثبات الثقة، ثم بيانات التواصل. غير مفهرس.</td>
+        </tr>
+        <tr>
+          <td><strong>كلمات مفتاحية</strong><br/>Keywords</td>
+          <td><span class="badge req">إلزامي للظهور في البحث</span></td>
+          <td class="limit">١٠٠</td>
+          <td>مخفية عن المستخدم · مفهرسة</td>
+          <td>قائمة مفصولة بفاصلة بدون مسافات: <code>تأمين,وثيقة,مطالبة,سيارة</code>. لا تكرر كلمات الاسم أو اسم الشركة. لا أسماء منافسين ولا كلمات أبل (iphone, ios, app store). كل كلمة أطول من حرفين.</td>
+        </tr>
+        <tr>
+          <td><strong>ما الجديد</strong><br/>What’s New</td>
+          <td><span class="badge req">إلزامي عند التحديث</span></td>
+          <td class="limit">٤٬٠٠٠</td>
+          <td>صفحة المنتج وتبويب التحديثات</td>
+          <td>غيّر ما يراه المستخدم: إصلاحات، مزايا، تحسينات. لا تكتب «إصلاح أخطاء» فقط.</td>
+        </tr>
+        <tr>
+          <td><strong>رابط الدعم</strong><br/>Support URL</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٢٥٥</td>
+          <td>صفحة المنتج</td>
+          <td>صفحة عامة تعمل بدون تسجيل دخول: تواصل، أسئلة شائعة، سياسة.</td>
+        </tr>
+        <tr>
+          <td><strong>رابط تسويقي</strong><br/>Marketing URL</td>
+          <td><span class="badge opt">اختياري</span></td>
+          <td class="limit">٢٥٥</td>
+          <td>صفحة المنتج</td>
+          <td>موقع المنتج أو الشركة.</td>
+        </tr>
+        <tr>
+          <td><strong>سياسة الخصوصية</strong><br/>Privacy Policy URL</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٢٥٥</td>
+          <td>قسم الخصوصية</td>
+          <td>رابط HTTPS عام يغطي جمع البيانات ومشاركتها وحقوق المستخدم. مطلوب أيضاً Privacy Nutrition Labels داخل الكونسول.</td>
+        </tr>
+        <tr>
+          <td><strong>حقوق النشر</strong><br/>Copyright</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td>—</td>
+          <td>صفحة المنتج</td>
+          <td>مثال: <code>2026 YourCompanyName</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="src">مرجع: App Store Connect Help — Character limits و Required properties (٢٠٢٦).</p>
+  </div>
+
+  <div class="card">
+    <h3>بيانات الحساب والإصدار (لا تظهر كلها للمستخدم)</h3>
+    <table>
+      <thead><tr><th>الحقل</th><th>إلزامي؟</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>Bundle ID</td><td><span class="badge req">إلزامي</span></td><td>معرّف ثابت من Xcode مثل <code>com.company.app</code> — لا يتغيّر بعد الإنشاء.</td></tr>
+        <tr><td>SKU</td><td><span class="badge req">إلزامي</span></td><td>معرّف داخلي لك، لا يظهر للمستخدم.</td></tr>
+        <tr><td>اللغة الأساسية</td><td><span class="badge req">إلزامي</span></td><td>Fallback لكل المتاجر التي بلا ترجمة.</td></tr>
+        <tr><td>التصنيف الأساسي / الثانوي</td><td><span class="badge req">إلزامي الأساسي</span></td><td>يطابق وظيفة التطبيق. الثانوي اختياري.</td></tr>
+        <tr><td>التصنيف العمري Age Rating</td><td><span class="badge req">إلزامي</span></td><td>استبيان محتوى (عنف، قمار، بيانات حساسة…). يُطبَّق على كل المنصات.</td></tr>
+        <tr><td>رقم الإصدار Version</td><td><span class="badge req">إلزامي</span></td><td>مثل 1.0.0 ويجب أن يزيد مع كل رفع.</td></tr>
+        <tr><td>ملاحظات المراجعة Review Notes</td><td><span class="badge opt">مستحسن جداً</span></td><td>حتى ٤٬٠٠٠ حرف/بايت. اشرح حساب التجربة، OTP، وأي مسار مخفي.</td></tr>
+        <tr><td>حساب تجريبي للمراجع</td><td><span class="badge req">إلزامي إن وُجد تسجيل دخول</span></td><td>يوزر وباسورد يعملان طوال فترة المراجعة + أي رمز تحقق.</td></tr>
+        <tr><td>معلومات الاتصال للمراجعة</td><td><span class="badge req">إلزامي</span></td><td>اسم، هاتف، إيميل يصل إليه المراجع.</td></tr>
+        <tr><td>App Privacy (Nutrition Labels)</td><td><span class="badge req">إلزامي</span></td><td>أنواع البيانات، هل ترتبط بالهوية، هل تُستخدم للتتبع — بما فيها SDK الطرف الثالث.</td></tr>
+        <tr><td>Content Rights</td><td><span class="badge req">إلزامي</span></td><td>تصريح أنك تملك أو لديك ترخيص المحتوى.</td></tr>
+        <tr><td>السعر والتوفر</td><td><span class="badge req">إلزامي</span></td><td>مجاني/مدفوع + الدول.</td></tr>
+        <tr><td>Digital Services Act (EU)</td><td><span class="badge req">إلزامي لأوروبا</span></td><td>هل أنت تاجر؟ إن نعم: عنوان وبيانات تواصل تُعرض في الاتحاد الأوروبي.</td></tr>
+        <tr><td>Privacy Choices URL</td><td><span class="badge opt">اختياري</span></td><td>صفحة يدير فيها المستخدم بياناته (حذف/تصدير).</td></tr>
+        <tr><td>Accessibility labels</td><td><span class="badge opt">مستحسن</span></td><td>ميزات الوصولية إن وُجدت.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>الأيقونة</h3>
+    <div class="size-grid">
+      <div class="size">
+        <b>أيقونة المتجر</b>
+        <span>١٠٢٤ × ١٠٢٤</span>
+        <small>PNG · RGB · بدون شفافية · بدون زوايا دائرية (أبل تطبّق القناع) · بدون نص صغير أو شارات ترتيب</small>
+      </div>
+    </div>
+    <div class="how">لا تضع إطار جهاز آيفون داخل الأيقونة، ولا شعار أبل، ولا تدرجاً شفافاً على الحواف.</div>
+  </div>
+
+  <div class="card">
+    <h3>لقطات الشاشة — Screenshots</h3>
+    <p style="font-size:13.5px;margin-bottom:10px">العدد: <strong>من ١ إلى ١٠</strong> لكل حجم جهاز ولكل لغة. الصيغة: <code>JPG / JPEG / PNG</code> بدون قناة ألفا أو شفافية. الحد الشائع لحجم الملف حوالي ١٠ ميجا. إن رفعت أعلى دقة، أبل تصغّرها للأجهزة الأصغر.</p>
+    <p style="font-size:13.5px;margin-bottom:10px"><strong>الحد الأدنى العملي ٢٠٢٦:</strong> مجموعة آيفون ٦٫٩ بوصة. وإن كان التطبيق يدعم آيباد: مجموعة ١٣ بوصة أيضاً.</p>
+    <div class="size-grid">
+      <div class="size">
+        <b>iPhone 6.9" — مطلوب</b>
+        <span>١٣٢٠ × ٢٨٦٨</span>
+        <small>أو ١٢٩٠×٢٧٩٦ أو ١٢٦٠×٢٧٣٦ · أفقي بالمقاسات المعكوسة · iPhone 16/17 Pro Max و Air و Plus</small>
+      </div>
+      <div class="size">
+        <b>iPhone 6.5" — بديل إن لم ترفع 6.9"</b>
+        <span>١٢٨٤ × ٢٧٧٨</span>
+        <small>أو ١٢٤٢×٢٦٨٨</small>
+      </div>
+      <div class="size">
+        <b>iPhone 6.3"</b>
+        <span>١٢٠٦ × ٢٦٢٢</span>
+        <small>أو ١١٧٩×٢٥٥٦ · يُولَّد تلقائياً من 6.5" إن لم ترفعه</small>
+      </div>
+      <div class="size">
+        <b>iPhone 6.1"</b>
+        <span>١١٧٠ × ٢٥٣٢</span>
+        <small>أو ١١٢٥×٢٤٣٦ أو ١٠٨٠×٢٣٤٠</small>
+      </div>
+      <div class="size">
+        <b>iPhone 5.5" (Plus القديم)</b>
+        <span>١٢٤٢ × ٢٢٠٨</span>
+        <small>يُولَّد من الأحجام الأكبر إن لم ترفعه</small>
+      </div>
+      <div class="size">
+        <b>iPhone 4.7" (SE)</b>
+        <span>٧٥٠ × ١٣٣٤</span>
+        <small>يُولَّد تلقائياً عادةً</small>
+      </div>
+      <div class="size">
+        <b>iPad 13" — مطلوب إن وُجد آيباد</b>
+        <span>٢٠٦٤ × ٢٧٥٢</span>
+        <small>أو ٢٠٤٨×٢٧٣٢ · أفقي بالمقاس المعكوس</small>
+      </div>
+      <div class="size">
+        <b>iPad 11"</b>
+        <span>١٦٦٨ × ٢٣٨٨</span>
+        <small>أو ١٤٨٨×٢٢٦٦ / ١٦٦٨×٢٤٢٠ / ١٦٤٠×٢٣٦٠ · يُولَّد من 13"</small>
+      </div>
+    </div>
+    <div class="how">
+      <strong>كيف تصمّم اللقطات:</strong> أول ٣ صور تظهر في نتائج البحث — اجعلها تشرح القيمة فوراً. النص فوق الصورة مسموح إن كان وصفياً لا دعائياً (ممنوع «الأفضل» و«رقم ١»). يجب أن تعكس واجهة حقيقية للإصدار الحالي. الإطار الخارجي للجهاز اختياري.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>فيديو المعاينة — App Preview (اختياري)</h3>
+    <table>
+      <tbody>
+        <tr><td>العدد</td><td>حتى ٣ فيديوهات لكل حجم جهاز ولكل لغة</td></tr>
+        <tr><td>المدة</td><td class="limit">١٥–٣٠ ثانية</td></tr>
+        <tr><td>الحجم</td><td class="limit">حتى ٥٠٠ ميجا</td></tr>
+        <tr><td>الصيغة</td><td><code>.mov / .mp4 / .m4v</code> · H.264 أو ProRes 422 HQ</td></tr>
+        <tr><td>الإطار</td><td>حتى ٣٠ fps · ستيريو AAC</td></tr>
+        <tr><td>دقة آيفون 6.9"/6.5"/6.3"/6.1"</td><td class="limit">٨٨٦ × ١٩٢٠ عمودي · ١٩٢٠ × ٨٨٦ أفقي</td></tr>
+        <tr><td>دقة آيباد 13"/11"</td><td class="limit">١٢٠٠ × ١٦٠٠ عمودي · ١٦٠٠ × ١٢٠٠ أفقي</td></tr>
+        <tr><td>المحتوى</td><td>لقطات حقيقية من داخل التطبيق فقط. ممنوع إعلان تمثيلي أو ممثلين أو شعارات «حمّل الآن».</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>الملف البرمجي لأبل</h3>
+    <ul class="tips">
+      <li>ملف <strong>IPA</strong> موقَّع بشهادة Distribution عبر Xcode أو Transporter / altool.</li>
+      <li>يتوافق مع إرشادات المراجعة App Review Guidelines (خصوصاً ٢.١ اكتمال الوظائف، ٥.١ الخصوصية، ٣.١ المدفوعات داخل التطبيق).</li>
+      <li>إن وُجدت مشتريات داخل التطبيق: اسم العرض ٣٠ حرف · الوصف ٤٥ حرف · لقطة شاشة للمراجع.</li>
+    </ul>
+  </div>
+
+  <!-- GOOGLE -->
+  <h2 id="google" class="google">٢) جوجل — Google Play Console</h2>
+
+  <div class="card">
+    <h3>النصوص المعروضة للمستخدم</h3>
+    <table>
+      <thead>
+        <tr><th>الحقل</th><th>إلزامي؟</th><th>الحد</th><th>أين يظهر</th><th>كيف يُكتب</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>اسم التطبيق</strong><br/>App name / Title</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٣٠</td>
+          <td>البحث والقوائم والصفحة</td>
+          <td>ممنوع الإيموجي والرموز الزخرفية. ممنوع تلميح ترتيب أو سعر («مجاني»، «رقم ١»). الحروف العربية واللاتينية تُحسب بالتساوي.</td>
+        </tr>
+        <tr>
+          <td><strong>الوصف القصير</strong><br/>Short description</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٨٠</td>
+          <td>أول نص في صفحة التفاصيل قبل التوسيع · وقد يظهر في أسطح ترويجية</td>
+          <td>جملة واحدة تشرح القيمة. بلا «حمّل الآن» وبلا إيموجي أو أسطر جديدة أو تكرار علامات ترقيم. نقطة في النهاية فقط إن وُجدت جملتان.</td>
+        </tr>
+        <tr>
+          <td><strong>الوصف الكامل</strong><br/>Full description</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٤٬٠٠٠</td>
+          <td>بعد توسيع الوصف القصير</td>
+          <td>الإيموجي مسموح هنا. ابدأ بالمنفعة ثم المزايا ثم لمن التطبيق. لا تكرار كلمات مفتاحية بشكل مفتعل. يُطبَّق Metadata policy على كل ترجمة.</td>
+        </tr>
+        <tr>
+          <td><strong>ملاحظات الإصدار</strong><br/>Release notes</td>
+          <td><span class="badge req">عند التحديث</span></td>
+          <td class="limit">٥٠٠</td>
+          <td>قسم «ما الجديد»</td>
+          <td>باختصار ما تغيّر في هذه النسخة.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="src">مرجع: Play Console Help — Create and set up your app + Best practices for your store listing.</p>
+  </div>
+
+  <div class="card">
+    <h3>بيانات المحتوى والامتثال (App content)</h3>
+    <table>
+      <thead><tr><th>الحقل</th><th>إلزامي؟</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>سياسة الخصوصية URL</td><td><span class="badge req">إلزامي في أغلب الحالات</span></td><td>رابط عام فعّال (ليس PDF وليس محجوباً جغرافياً). إلزامي دائماً لتطبيقات الأطفال وللتطبيقات التي تجمع بيانات حسّاسة. يُفضَّل رفعه لكل تطبيق.</td></tr>
+        <tr><td>نموذج أمان البيانات Data safety</td><td><span class="badge req">إلزامي</span></td><td>ما يُجمع ويُشارك حتى لو «لا نجمع شيئاً». يشمل Android ID كمعرّف جهاز. يجب أن يطابق سياسة الخصوصية.</td></tr>
+        <tr><td>تصنيف المحتوى Content rating</td><td><span class="badge req">إلزامي</span></td><td>استبيان IARC. بدون تصنيف يُرفض أو يُحذف.</td></tr>
+        <tr><td>الجمهور المستهدف Target audience</td><td><span class="badge req">إلزامي</span></td><td>الفئة العمرية. إن شملت أطفالاً تُفعَّل سياسات Families / COPPA.</td></tr>
+        <tr><td>هل يحتوي إعلانات؟</td><td><span class="badge req">إلزامي</span></td><td>تصريح نعم/لا. إعلانات الأطفال لها SDK معتمد فقط.</td></tr>
+        <tr><td>الوصول للتطبيق App access</td><td><span class="badge req">إن وُجد قفل</span></td><td>حساب تجريبي أو تعليمات تجاوز جدار التسجيل للمراجع.</td></tr>
+        <tr><td>التصنيف Category</td><td><span class="badge req">إلزامي</span></td><td>تطبيق أو لعبة + فئة فرعية.</td></tr>
+        <tr><td>البريد الإلكتروني للتواصل</td><td><span class="badge req">إلزامي</span></td><td>يظهر للمستخدمين.</td></tr>
+        <tr><td>الموقع / الهاتف</td><td><span class="badge opt">مستحسن</span></td><td>يعزّز الثقة.</td></tr>
+        <tr><td>Package name</td><td><span class="badge req">إلزامي</span></td><td>ثابت مثل <code>com.company.app</code>. تسجيل أسماء الحزم مطلوب وفق سياسة التحقق ٢٠٢٦.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>الأصول البصرية — Graphics</h3>
+    <div class="size-grid">
+      <div class="size">
+        <b>أيقونة عالية الدقة — إلزامي</b>
+        <span>٥١٢ × ٥١٢</span>
+        <small>PNG 32-bit مع ألفا · حد أقصى ١٠٢٤ كيلوبايت · بدون شارات ترتيب أو سعر · الزوايا تُقوَّس تلقائياً</small>
+      </div>
+      <div class="size">
+        <b>Feature Graphic — إلزامي</b>
+        <span>١٠٢٤ × ٥٠٠</span>
+        <small>JPEG أو PNG 24-bit بدون شفافية · غلاف الفيديو وصفحات الترويج · أبقِ العناصر المهمة في المنتصف بعيداً عن الحواف</small>
+      </div>
+      <div class="size">
+        <b>بانر Android TV — إن وُجد TV</b>
+        <span>١٢٨٠ × ٧٢٠</span>
+        <small>JPEG أو PNG 24-bit بدون ألفا</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>لقطات الشاشة — Screenshots</h3>
+    <p style="font-size:13.5px;margin-bottom:10px">لنشر الصفحة: <strong>صورتان على الأقل</strong> عبر أنواع الأجهزة. الحد الأقصى <strong>٨ لكل نوع جهاز</strong>. JPEG أو PNG 24-bit بدون شفافية. حجم الملف حتى <strong>٨ ميجا</strong> للصورة. كل ضلع بين <strong>٣٢٠ و ٣٨٤٠</strong> بكسل، والضلع الطويل لا يتجاوز ضعف القصير.</p>
+    <div class="size-grid">
+      <div class="size">
+        <b>هاتف — الحد الأدنى للنشر</b>
+        <span>١٠٨٠ × ١٩٢٠</span>
+        <small>مستحسن عمودي ٩:١٦ أو أفقي ١٦:٩ ١٩٢٠×١٠٨٠ · ٢ إلى ٨ صور</small>
+      </div>
+      <div class="size">
+        <b>للترشيح Featuring (تطبيقات)</b>
+        <span>٤ صور ≤ ١٠٨٠</span>
+        <small>منها واحدة أفقية ١٦:٩ على الأقل ١٩٢٠×١٠٨٠</small>
+      </div>
+      <div class="size">
+        <b>تابلت ٧" و ١٠" / Chromebook</b>
+        <span>٤–٨ صور</span>
+        <small>الضلع القصير من ١٠٨٠ حتى ٧٦٨٠ · ١٦:٩ أو ٩:١٦ · بدون نص زائد خارج الواجهة</small>
+      </div>
+      <div class="size">
+        <b>Wear OS</b>
+        <span>٣٨٤ × ٣٨٤ كحد أدنى</span>
+        <small>نسبة ١:١ · صورة واحدة على الأقل · واجهة الساعة فقط بدون إطار جهاز</small>
+      </div>
+      <div class="size">
+        <b>Android TV</b>
+        <span>١٩٢٠ × ١٠٨٠</span>
+        <small>١٦:٩ · صورة واحدة على الأقل + البانر</small>
+      </div>
+      <div class="size">
+        <b>Android XR</b>
+        <span>١٩٢٠ × ١٢٠٠</span>
+        <small>٤–٨ صور · نسبة ٨:٥ · المستحسن ٣٨٤٠×٢٤٠٠</small>
+      </div>
+    </div>
+    <div class="how">
+      <strong>نص فوق اللقطة:</strong> إن وُجد فلا يتجاوز نحو ٢٠٪ من الصورة. ممنوع «حمّل الآن» و«الأفضل» و«خصم». أظهر شريط الحالة نظيفاً (بطارية وواي فاي ممتلئان، بلا إشعارات أو اسم مشغّل). أضف نصاً بديلاً Alt text حتى ١٤٠ حرفاً لكل صورة لقارئات الشاشة.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>فيديو المعاينة (اختياري ومستحسن جداً للألعاب)</h3>
+    <ul class="tips">
+      <li>ليس رفع ملف: ضع <strong>رابط يوتيوب</strong> عام أو Unlisted، قابل للتضمين، بدون إعلانات، وغير مقيّد عمرياً.</li>
+      <li>أول <strong>٣٠ ثانية</strong> قد تُشغَّل صامتة تلقائياً فوق الـ Feature Graphic.</li>
+      <li>اعرض التجربة الحقيقية من الثانية الأولى. ٨٠٪ من الفيديو يجب أن يكون من داخل التطبيق.</li>
+      <li>عمودي أو أفقي حسب طبيعة التطبيق. بلا أشرطة سوداء على الجوانب.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>الملف البرمجي لجوجل</h3>
+    <ul class="tips">
+      <li>صيغة النشر الحالية: <strong>AAB (Android App Bundle)</strong> وليس APK للمتجر.</li>
+      <li>Target API حسب سياسة السنة (في ٢٠٢٦ يُرفع تدريجياً نحو إصدارات أحدث — راجع Play Console عند الرفع).</li>
+      <li>توقيع التطبيق عبر Play App Signing مستحسن/مطلوب للحزم الجديدة.</li>
+    </ul>
+  </div>
+
+  <!-- HUAWEI -->
+  <h2 id="huawei" class="huawei">٣) هواوي — AppGallery Connect</h2>
+
+  <div class="card">
+    <h3>النصوص المعروضة للمستخدم</h3>
+    <table>
+      <thead>
+        <tr><th>الحقل</th><th>إلزامي؟</th><th>الحد</th><th>أين يظهر</th><th>كيف يُكتب</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>اسم التطبيق</strong><br/>App name</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٣–٦٤</td>
+          <td>البحث والصفحة · مفهرس بقوة</td>
+          <td>يجب أن يكون فريداً وغير عام. ممنوع الرموز <code>*</code> و <code>&amp;</code> وأسماء علامات أخرى. ممنوع عبارة «للأطفال» إلا ضمن فئة الأطفال.</td>
+        </tr>
+        <tr>
+          <td><strong>مقدمة مختصرة</strong><br/>Brief introduction</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">٨٠</td>
+          <td>البطاقة والبحث · مفهرس</td>
+          <td>في بعض شاشات HarmonyOS: ١٧ حرفاً للصينية و ٨٠ لغيرها. نفس قواعد الوصف القصير: قيمة واضحة بدون مبالغة.</td>
+        </tr>
+        <tr>
+          <td><strong>المقدمة الكاملة</strong><br/>Full introduction</td>
+          <td><span class="badge req">إلزامي</span></td>
+          <td class="limit">١٠٠–٨٬٠٠٠</td>
+          <td>صفحة التفاصيل · مفهرس</td>
+          <td>الحد الأدنى ١٠٠ حرف. أطول من جوجل وأبل — استخدمه لشرح الوظائف بصدق. بلا HTML (لن يُعرض كتنسيق وسيظهر الكود).</td>
+        </tr>
+        <tr>
+          <td><strong>مميزات النسخة الجديدة</strong><br/>New features</td>
+          <td><span class="badge req">عند التحديث</span></td>
+          <td class="limit">٥٠٠ الصين · ١٬٠٠٠ غيرها</td>
+          <td>صفحة التحديث</td>
+          <td>أبرز ما تغيّر في هذه النسخة.</td>
+        </tr>
+        <tr>
+          <td><strong>الموقع الرسمي</strong></td>
+          <td><span class="badge req">مطلوب عادةً</span></td>
+          <td>—</td>
+          <td>بيانات التطبيق</td>
+          <td>رابط الشركة أو المنتج.</td>
+        </tr>
+        <tr>
+          <td><strong>سياسة الخصوصية</strong></td>
+          <td><span class="badge req">إلزامي إن وُجدت بيانات</span></td>
+          <td>—</td>
+          <td>صفحة التفاصيل وداخل التطبيق</td>
+          <td>HTTPS. توضح الجمع والاستخدام والمشاركة وحقوق المستخدم وقناة للشكاوى. مطلوبة أيضاً داخل التطبيق إن كان يجمع بيانات.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="how">
+      <strong>فهرسة هواوي مختلفة:</strong> الاسم والوصف القصير والكامل واسم المطوّر كلها تُفهرس. حدّث البيانات مع نسخة جديدة عادةً (مثل أبل). ترجم كل لغة على حدة وإلا سيظهر النص الافتراضي في كل الدول.
+    </div>
+    <p class="src">مرجع: AppGallery Connect — Configuring Localized Information + Review Guidelines + مواصفات الأصول البصرية.</p>
+  </div>
+
+  <div class="card">
+    <h3>بيانات الحساب والإصدار</h3>
+    <table>
+      <thead><tr><th>الحقل</th><th>إلزامي؟</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>التحقق من هوية المطوّر</td><td><span class="badge req">إلزامي</span></td><td>حساب مجاني بعد التحقق الحقيقي (فرد أو شركة).</td></tr>
+        <tr><td>الأجهزة المتوافقة</td><td><span class="badge req">إلزامي</span></td><td>هاتف، تابلت، ساعة، Vision، سيارة… حسب الحزمة.</td></tr>
+        <tr><td>اللغات</td><td><span class="badge req">إلزامي</span></td><td>اللغة الافتراضية + أي ترجمة. الأصول تُرفع لكل لغة.</td></tr>
+        <tr><td>التصنيف Category</td><td><span class="badge req">إلزامي</span></td><td>يطابق الوظيفة الفعلية.</td></tr>
+        <tr><td>التصنيف العمري</td><td><span class="badge req">إلزامي</span></td><td>استبيان يدوي في الكونسول (لا يُكمل عبر Publishing API).</td></tr>
+        <tr><td>حساب تجريبي للمراجع</td><td><span class="badge req">إن وُجد تسجيل دخول</span></td><td>حساب صالح طوال المراجعة + أي عتاد خاص.</td></tr>
+        <tr><td>بيانات تواصل صحيحة</td><td><span class="badge req">إلزامي</span></td><td>يرفضون التطبيق إن تعذّر الوصول إليك.</td></tr>
+        <tr><td>وصف الصلاحيات الحسّاسة</td><td><span class="badge req">إن وُجدت</span></td><td>سبب وسيناريو كل إذن حسّاس (خصوصية HarmonyOS / Android).</td></tr>
+        <tr><td>وسوم الخصوصية Privacy tags</td><td><span class="badge req">لبعض تطبيقات HarmonyOS</span></td><td>تظهر في صفحة التفاصيل لشرح استخدام البيانات.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>الأيقونة</h3>
+    <div class="size-grid">
+      <div class="size">
+        <b>أيقونة المتجر — إلزامي</b>
+        <span>٥١٢ × ٥١٢</span>
+        <small>أو ٢١٦×٢١٦ · PNG مربع · حد ٢ ميجا (PNG) أو ١٠٠ كيلو لـ WEBP · المستحسن ٥١٢ لتفادي الرفض</small>
+      </div>
+    </div>
+    <div class="how">يجب أن تطابق أيقونة الحزمة. بلا شعارات متاجر أخرى أو علامات أجهزة منافسة. مناسبة لكل الأعمار ما لم تكن فئة أطفال رسمية.</div>
+  </div>
+
+  <div class="card">
+    <h3>لقطات الشاشة — Screenshots</h3>
+    <p style="font-size:13.5px;margin-bottom:10px">الحد الأدنى الرسمي: <strong>٣ لقطات مختلفة</strong>. الشائع للموبايل: <strong>٣ إلى ٨</strong>. في بعض أنواع الأجهزة قد يُطلب ٣–٥ أو ٥–٨. يجب أن تطابق الوظائف الفعلية وإلا يتأخر أو يُرفض المراجعة.</p>
+    <div class="size-grid">
+      <div class="size">
+        <b>موبايل — المستحسن</b>
+        <span>١٠٨٠ × ١٩٢٠</span>
+        <small>أو ١٠٨٠×٢٤٠٠ · الحد الأدنى الشائع ٤٥٠×٨٠٠ / ٨٠٠×٤٥٠ · كل ضلع ٣٢٠–٣٨٤٠</small>
+      </div>
+      <div class="size">
+        <b>موبايل — الصيغة والحجم</b>
+        <span>PNG / JPG / JPEG</span>
+        <small>غالباً حتى ٢ ميجا للصورة (بعض الوثائق تذكر ٥ ميجا) · WEBP حتى ١٠٠ كيلو</small>
+      </div>
+      <div class="size">
+        <b>ساعة Watch</b>
+        <span>١٨٠ × ٢٤٠ أو ٨٤٠ × ٨٤٠</span>
+        <small>٣–٨ أو ٤–٨ حسب نوع الساعة · مربعة في بعض الأنواع</small>
+      </div>
+      <div class="size">
+        <b>Vision / شاشات كبيرة</b>
+        <span>١٩٢٠ × ١٠٨٠</span>
+        <small>أو ١٢٨٠×٧٢٠ · ٥ إلى ٨ صور</small>
+      </div>
+    </div>
+    <div class="how">
+      ممنوع لقطات تطبيقات أخرى أو مبالغة في الوظائف. ممنوع شعارات أبل/جوجل أو ماركات أجهزة غير هواوي. المحتوى مناسب للجمهور العام ما لم تُصنَّف فئة الأطفال.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>فيديو تعريفي (اختياري)</h3>
+    <ul class="tips">
+      <li>يُرفع مع الأصول المحلية لكل لغة.</li>
+      <li>المدة الشائعة للقبول السريع: حوالي <strong>١٥–٣٠ ثانية</strong>، MP4، دقة عالية (١٠٨٠p مستحسن).</li>
+      <li>نفس قاعدة اللقطات: تجربة حقيقية، بلا تضليل، بلا علامات متاجر منافسة.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>الملف البرمجي لهواوي</h3>
+    <ul class="tips">
+      <li>Android: <strong>APK</strong> أو <strong>AAB</strong>. HarmonyOS: حزمة Harmony. Quick App: RPK.</li>
+      <li>حد الحزمة الشائع حتى <strong>٤ جيجا</strong> (الرفع المجزأ للحزم الكبيرة عبر API).</li>
+      <li>إن وُجدت مدفوعات داخل التطبيق: هواوي IAP إلزامي لفتح الميزات المدفوعة على AppGallery.</li>
+      <li>التطبيق يجب أن يُثبَّت ويُشغَّل ويُحذف بشكل طبيعي على أجهزة هواوي السائدة. ممنوع التحديث الذاتي بتحميل كود تنفيذي من خارج المتجر.</li>
+    </ul>
+  </div>
+
+  <!-- SHARED -->
+  <h2 id="shared" class="shared">٤) بيانات مطلوبة في المتاجر الثلاثة</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>البند</th><th>أبل</th><th>جوجل</th><th>هواوي</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>حساب مطوّر موثّق</td>
+          <td>Apple Developer Program ٩٩$/سنة · هوية / D-U-N-S للشركات</td>
+          <td>٢٥$ مرة واحدة + تحقّق هوية</td>
+          <td>مجاني بعد التحقّق الحقيقي</td>
+        </tr>
+        <tr>
+          <td>سياسة خصوصية عامة</td>
+          <td>إلزامي</td>
+          <td>إلزامي عملياً + Data safety</td>
+          <td>إلزامي مع جمع البيانات + داخل التطبيق</td>
+        </tr>
+        <tr>
+          <td>تصنيف عمري</td>
+          <td>استبيان أبل</td>
+          <td>IARC</td>
+          <td>استبيان AppGallery</td>
+        </tr>
+        <tr>
+          <td>حساب تجريبي للمراجع</td>
+          <td>نعم إن وُجد لوجين</td>
+          <td>نعم (App access)</td>
+          <td>نعم</td>
+        </tr>
+        <tr>
+          <td>ترجمة عربية</td>
+          <td>Locale مستقل (٣٠ اسم + ٣٠ عنوان + ١٠٠ كلمات)</td>
+          <td>لغة مستقلة لكل الحقول والصور</td>
+          <td>لغة مستقلة · بدونها يظهر النص الافتراضي</td>
+        </tr>
+        <tr>
+          <td>المحتوى = التطبيق الحقيقي</td>
+          <td>Guideline 2.3</td>
+          <td>Metadata policy</td>
+          <td>Review 1.6–1.10</td>
+        </tr>
+        <tr>
+          <td>ممنوعات شائعة في النصوص والصور</td>
+          <td>إيموجي، أسماء منافسين، «الأفضل»، علامات أبل</td>
+          <td>إيموجي في الاسم، ترتيب المتجر، خصومات، CTA تحميل</td>
+          <td>رموز * &amp;، ماركات أخرى، تضليل الوظائف</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>ما يجب تجهيزه مرة واحدة ثم نسخه للمتاجر</h3>
+    <ul class="tips">
+      <li><strong>اسم عربي</strong> ≤ ٣٠ حرفاً ليمرّ أبل وجوجل معاً (هواوي يقبل حتى ٦٤).</li>
+      <li><strong>وصف قصير</strong> نسختان: ٣٠ حرفاً لأبل (Subtitle) و ٨٠ لجوجل/هواوي.</li>
+      <li><strong>وصف كامل</strong> ٤٬٠٠٠ حرف يكفي أبل وجوجل. هواوي يحتاج ١٠٠ حرف كحد أدنى ويمكن إطالته حتى ٨٬٠٠٠.</li>
+      <li><strong>كلمات مفتاحية</strong> ١٠٠ حرف بدون مسافات بعد الفواصل — لأبل فقط كحقل مخفي.</li>
+      <li><strong>أيقونة ماستر</strong> ١٠٢٤×١٠٢٤ بدون شفافية → صدّر منها ٥١٢ و ٢١٦.</li>
+      <li><strong>لقطات ماستر</strong>: آيفون ١٣٢٠×٢٨٦٨ + أندرويد ١٠٨٠×١٩٢٠ + Feature ١٠٢٤×٥٠٠. إن وُجد آيباد: ٢٠٦٤×٢٧٥٢.</li>
+      <li><strong>سياسة خصوصية</strong> على HTTPS بالعربية (والإنجليزية إن وُجدت أسواق أخرى).</li>
+      <li><strong>صفحة دعم</strong> عامة.</li>
+      <li><strong>حساب مراجعة</strong> جاهز: بريد/جوال + كلمة مرور + طريقة تجاوز OTP.</li>
+      <li><strong>فيديو ١٥–٣٠ ثانية</strong> من داخل التطبيق: يُرفع لأبل كملف، ولجوجل كرابط يوتيوب، ولهواوي كملف إن رغبت.</li>
+    </ul>
+  </div>
+
+  <!-- WRITE -->
+  <h2 id="write" class="compare">٥) كيف تكتب كل حقل — قواعد عملية</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>الاسم</h3>
+      <div class="how">
+        ابدأ بالعلامة التجارية ثم المنفعة إن بقي مكان.<br/>
+        جيد: «[اسم تطبيقك] — [منفعتك]» (مثال: «تطبيقك — للخدمات السريعة»)<br/>
+        ضعيف: «أفضل تطبيق تأمين ٢٠٢٦!!!»<br/>
+        احسب ٣٠ حرفاً قبل الترجمة: الاسم العربي الأطول قد يُقصّ على أبل وجوجل.
+      </div>
+    </div>
+    <div class="card">
+      <h3>الوصف القصير / Subtitle</h3>
+      <div class="how">
+        أجب عن: ماذا يفعل؟ لمن؟<br/>
+        جيد: «أدر وثائقك وقدّم مطالباتك من جوالك»<br/>
+        ضعيف: «حمّل الآن وجرّب الأفضل»<br/>
+        أبل ٣٠ حرفاً = كلمات بحث. جوجل/هواوي ٨٠ = جملة بيع قصيرة.
+      </div>
+    </div>
+    <div class="card">
+      <h3>الوصف الكامل</h3>
+      <div class="how">
+        ١) فقرة افتتاحية تظهر قبل «المزيد».<br/>
+        ٢) قائمة مزايا بصدق.<br/>
+        ٣) من يستخدمه (أفراد / أسطول / وسطاء).<br/>
+        ٤) ثقة: ترخيص، دعم، أسواق.<br/>
+        ٥) روابط أو إيميل الدعم في الأسفل.<br/>
+        لا تنسخ كلمات مفتاحية عشر مرات. لا تعد بوظائف غير موجودة في النسخة المرفوعة.
+      </div>
+    </div>
+    <div class="card">
+      <h3>كلمات أبل المفتاحية</h3>
+      <div class="how">
+        <code>تأمين,وثائق,مطالبات,سيارات,حوادث</code><br/>
+        بلا مسافات بعد الفاصلة. لا تكرر الاسم. لا أسماء شركات أخرى. راقب أن المجموع ≤ ١٠٠.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>الترجمة العربية والإنجليزية</h3>
+    <ul class="tips">
+      <li>كل لغة لها ميزانية حروف مستقلة — الترجمة توسّع الظهور في البحث خصوصاً على أبل.</li>
+      <li>إن وُجد نص على اللقطات: ارفع مجموعة صور لكل لغة.</li>
+      <li>لا تخلط عربي وإنجليزي في اسم واحد بشكل يكسّر حد الـ ٣٠ حرفاً.</li>
+      <li>روابط الخصوصية والدعم يمكن تعريبها إن توفّرت صفحات عربية.</li>
+    </ul>
+  </div>
+
+  <!-- CHECKLIST -->
+  <h2 id="checklist" class="compare">٦) قائمة تجهيز قبل الرفع</h2>
+  <div class="grid3">
+    <div class="card">
+      <h3>أبل</h3>
+      <ul class="check">
+        <li>حساب Developer فعّال</li>
+        <li>الاسم ٣٠ + Subtitle ٣٠</li>
+        <li>وصف ٤٠٠٠ + Keywords ١٠٠</li>
+        <li>Support + Privacy URL</li>
+        <li>أيقونة ١٠٢٤×١٠٢٤</li>
+        <li>لقطات 6.9" (و 13" للآيباد)</li>
+        <li>Age Rating + App Privacy</li>
+        <li>حساب مراجعة + ملاحظات</li>
+        <li>Copyright + تصنيف + سعر</li>
+        <li>DSA إن كان السوق الأوروبي</li>
+        <li>IPA موقَّع</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>جوجل</h3>
+      <ul class="check">
+        <li>حساب Play Console موثّق</li>
+        <li>الاسم ٣٠ + وصف ٨٠ + ٤٠٠٠</li>
+        <li>أيقونة ٥١٢×٥١٢ ≤ ١ ميجا</li>
+        <li>Feature Graphic ١٠٢٤×٥٠٠</li>
+        <li>لقطتان هاتف على الأقل (٨ كحد)</li>
+        <li>سياسة خصوصية + Data safety</li>
+        <li>Content rating + الجمهور</li>
+        <li>تصريح الإعلانات</li>
+        <li>App access / حساب تجريبي</li>
+        <li>إيميل تواصل ظاهر</li>
+        <li>AAB موقَّع</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>هواوي</h3>
+      <ul class="check">
+        <li>حساب AppGallery موثّق الهوية</li>
+        <li>الاسم ٣–٦٤ بدون * و &amp;</li>
+        <li>مختصر ٨٠ + كامل ١٠٠–٨٠٠٠</li>
+        <li>أيقونة ٥١٢×٥١٢ PNG</li>
+        <li>٣ لقطات مختلفة على الأقل</li>
+        <li>سياسة خصوصية HTTPS</li>
+        <li>تصنيف + تصنيف عمري</li>
+        <li>أجهزة متوافقة + لغات</li>
+        <li>حساب تجريبي للمراجع</li>
+        <li>موقع رسمي</li>
+        <li>APK / AAB / Harmony package</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>مصادر رسمية يُرجع إليها عند الرفع:</strong>
+    Apple — Screenshot specifications، App preview specifications، Required properties، App Privacy.
+    Google — Play Console Help: Create and set up your app، Add preview assets، Prepare your app for review.
+    Huawei — AppGallery Connect Localized Information، Specifications for App Visual Assets، AppGallery Review Guidelines.
+    <br/>إن تعارض رقم في هذا التقرير مع ما يظهر داخل الكونسول وقت الرفع، اعتمد الكونسول.
+  </div>
+
+</main>
+<footer class="footer">دليل متطلبات ونماذج Metadata للمتاجر (App Store · Google Play · AppGallery) · الدليل الشامل لمطوري تطبيقات الموبايل</footer>
+</body>
+</html>

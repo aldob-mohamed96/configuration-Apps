@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS" />
   <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
   <img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" alt="Google Play" />
+  <img src="https://img.shields.io/badge/Huawei_AppGallery-C7000B?style=for-the-badge&logo=huawei&logoColor=white" alt="Huawei" />
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions" />
   <img src="https://img.shields.io/badge/Meta_For_Developers-0668E1?style=for-the-badge&logo=meta&logoColor=white" alt="Meta" />
   <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License" />
@@ -20,7 +21,8 @@
 1. **أتمتة النشر الكامل على متجر أبل (App Store & TestFlight CI/CD)** عبر GitHub Actions بدون الحاجة لجهاز ماك محلي عند النشر.
 2. **أتمتة النشر الكامل على متجر جوجل بلاي (Google Play Store & Internal Testing CI/CD)** عبر GitHub Actions لبناء وتوقيع حزم Android App Bundle (`.aab`) وزيادة أرقام الإصدارات تلقائياً.
 3. **الربط المتكامل لـ Facebook SDK & Meta App Events** لتتبع حملات التثبيت الإعلانية (App Install Ads) والأحداث المخصصة داخل التطبيق.
-4. **توجيهات مخصصة لمساعدي الذكاء الاصطناعي (AI Coding Agents)** لتنفيذ العمليات البرمجية بشكل مستقل ودقيق في أي مشروع فلاتر.
+4. **دليل ونماذج متطلبات الـ Metadata لنشر التطبيقات على المتاجر الثلاثة (App Store / Google Play / Huawei AppGallery):** جداول المقاسات، الحدود القصوى للحروف، نماذج نصوص جاهزة وقابلة للتخصيص، وقواعد تجنب الرفض.
+5. **توجيهات مخصصة لمساعدي الذكاء الاصطناعي (AI Coding Agents)** لتنفيذ العمليات البرمجية بشكل مستقل ودقيق في أي مشروع فلاتر.
 
 ---
 
@@ -48,6 +50,9 @@ configuration-Apps/
 │   ├── 🤖 FACEBOOK_SDK_AI_PROMPT_GUIDE.md         # برومبت احترافي جاهز للذكاء الاصطناعي لتنفيذ الربط ذاتياً
 │   ├── 🌐 FACEBOOK_SDK_GUIDE.html                 # صفحة ويب تفاعلية إرشادية وتوثيق مرئي للمطورين
 │   └── 🌐 index.html
+│
+├── 📁 "meta data upload 3 store"/
+│   └── 🌐 store-metadata-requirements.html        # الدليل الشامل ونماذج الـ Metadata الموحدة للمتاجر الثلاثة
 │
 └── 📄 README.md                                   # الفهرس والدليل العام للمستودع
 ```
@@ -103,6 +108,22 @@ configuration-Apps/
 
 ---
 
+### 4️⃣ دليل ونماذج الـ Metadata لنشر المتاجر الثلاثة (Store Metadata Guide)
+📂 **المسار:** [`meta data upload 3 store`](file:///Users/mohamedgaber/projects/configuration%20Apps/meta%20data%20upload%203%20store)
+
+دليل مرجعي متكامل ومفصل يغطي كافة المتطلبات النصية والبصرية والتنظيمية اللازمة لرفع أي تطبيق على المتاجر الثلاثة الكبرى: **Apple App Store** و **Google Play Store** و **Huawei AppGallery**.
+
+#### ✨ ما يحتويه الدليل:
+- **نماذج نصوص جاهزة وقابلة للتخصيص (Templates):** نصوص عامة جاهزة للنسخ المباشر بالعربية والإنجليزية لأي تطبيق (اسم التطبيق، العنوان الفرعي Subtitle، الوصف القصير، الوصف الكامل Full Description، ما الجديد Release Notes، النص الترويجي، والكلمات المفتاحية Keywords).
+- **مقارنة تفصيلية لحدود الحروف (Character Limits):** جدول مقارن دقيق للحقول الإلزامية والاختيارية وحدود الحروف بين أبل (30 حرف للاسم)، جوجل (30 حرف)، وهواوي (64 حرف).
+- **الأبعاد والمواصفات البصرية (Visual Assets Specifications):** أبعاد لقطات الشاشة (Screenshots) لكافة أحجام شاشات الآيفون والأندرويد والآيباد، الأيقونات الرسمية، وصور الرسم المميز (Feature Graphic 1024×500).
+- **قواعد تجنب الرفض (Rejection Prevention):** إرشادات تفصيلية لما يجب تجنب كتابته (الأسعار، العروض المؤقتة، عبارات المبالغة، والإيموجي في الأسماء).
+- **نموذج حساب المراجعة (Review Notes):** صيغة نموذجية بالإنجليزية لتقديم بيانات الحساب التجريبي وبيانات الدخول لفرق مراجعة المتاجر.
+
+> 🔗 **للاطلاع على الدليل الكامل:** تصفح [دليل ونماذج الـ Metadata للمتاجر](file:///Users/mohamedgaber/projects/configuration%20Apps/meta%20data%20upload%203%20store/store-metadata-requirements.html).
+
+---
+
 ## 🔒 دليل الأمان وحماية المفاتيح | Security Best Practices
 
 > [!WARNING]
@@ -134,6 +155,7 @@ configuration-Apps/
 ## 🗺️ خريطة التطوير القادمة | Upcoming Additions
 
 - [x] 🤖 **Google Play CI/CD Pipeline:** سير عمل GitHub Actions لرفع حزم Android App Bundle (`.aab`) تلقائياً إلى مسار الاختبار الداخلي في Google Play Console.
+- [x] 📋 **Multi-Store Metadata Requirements Guide:** دليل متكامل لنماذج الـ Metadata والمتطلبات البصرية للمتاجر الثلاثة.
 - [ ] 📊 **TikTok & Snapchat Events SDK:** أدلة ربط وتتبع الإعلانات على المنصات الترويجية الأخرى في تطبيقات Flutter.
 - [ ] 🚀 **Fastlane Integration Template:** نماذج إعداد Fastlane للمشاريع الكبيرة والفرق المتعددة.
 
