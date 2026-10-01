@@ -1,10 +1,11 @@
 # 🚀 Mobile Apps Configuration & CI/CD Automation Hub
-### مستودع الإعدادات الاحترافية وأتمتة النشر والربط التسويقي لتطبيقات الموبايل (Flutter / iOS / Android)
+### مستودع الإعدادات الاحترافية وأتمتة النشر والربط التسويقي والمصادقة والخرائط لتطبيقات الموبايل (Flutter / iOS / Android)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
   <img src="https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS" />
   <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
+  <img src="https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=google-maps&logoColor=white" alt="Google Maps" />
   <img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" alt="Google Play" />
   <img src="https://img.shields.io/badge/Huawei_AppGallery-C7000B?style=for-the-badge&logo=huawei&logoColor=white" alt="Huawei" />
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GitHub Actions" />
@@ -16,13 +17,15 @@
 
 ## 📖 نظرة عامة | Overview
 
-مستودع شامل ومخصص لمطوري تطبيقات الموبايل وفرق العمل التقنية. يحتوي على أدلة تقنية مفصلة، ملفات إعداد جاهزة للإنتاج (Production-ready Configurations)، وسير عمل مؤتمتة (CI/CD Pipelines) تهدف إلى توفير مئات الساعات في إعداد ونشر وتتبع تطبيقات الهواتف الذكية:
+مستودع شامل ومخصص لمطوري تطبيقات الموبايل وفرق العمل التقنية. يحتوي على أدلة تقنية مفصلة، ملفات إعداد جاهزة للإنتاج (Production-ready Configurations)، وسير عمل مؤتمتة (CI/CD Pipelines) تهدف إلى توفير مئات الساعات في إعداد ونشر وتتبع وتطوير تطبيقات الهواتف الذكية:
 
 1. **أتمتة النشر الكامل على متجر أبل (App Store & TestFlight CI/CD)** عبر GitHub Actions بدون الحاجة لجهاز ماك محلي عند النشر.
 2. **أتمتة النشر الكامل على متجر جوجل بلاي (Google Play Store & Internal Testing CI/CD)** عبر GitHub Actions لبناء وتوقيع حزم Android App Bundle (`.aab`) وزيادة أرقام الإصدارات تلقائياً.
 3. **الربط المتكامل لـ Facebook SDK & Meta App Events** لتتبع حملات التثبيت الإعلانية (App Install Ads) والأحداث المخصصة داخل التطبيق.
 4. **دليل ونماذج متطلبات الـ Metadata لنشر التطبيقات على المتاجر الثلاثة (App Store / Google Play / Huawei AppGallery):** جداول المقاسات، الحدود القصوى للحروف، نماذج نصوص جاهزة وقابلة للتخصيص، وقواعد تجنب الرفض.
-5. **توجيهات مخصصة لمساعدي الذكاء الاصطناعي (AI Coding Agents)** لتنفيذ العمليات البرمجية بشكل مستقل ودقيق في أي مشروع فلاتر.
+5. **تسجيل الدخول الاجتماعي عبر Google & Apple (Social Authentication):** الربط الآمن مع Firebase والـ Backend، استخراج بصمات SHA-1، تشفير Nonce بـ SHA-256، ودعم أحدث معايير v7.
+6. **تكامل خرائط جوجل (Google Maps for iOS & Android):** إعداد الـ SDK والصلاحيات الدقيقة، حل مشكلات الـ API Keys والشاشة الرمادية، وإدارة الكاميرا والعلامات والوضع الليلي.
+7. **توجيهات مخصصة لمساعدي الذكاء الاصطناعي (AI Coding Agents)** لتنفيذ العمليات البرمجية بشكل مستقل ودقيق في أي مشروع فلاتر.
 
 ---
 
@@ -30,6 +33,16 @@
 
 ```text
 configuration-Apps/
+│
+├── 📁 "apple and google authentication login"/
+│   ├── 📘 GOOGLE_AND_APPLE_AUTH_GUIDE.md          # الدليل الشامل لمصادقة جوجل وأبل خطوة بخطوة
+│   ├── 📄 social_auth_service.dart                # كود خدمة فلاتر كامل وجاهز للإنتاج (v7 API + Nonce)
+│   └── 🌐 index.html                              # توثيق تفاعلي مرئي بمخصص حي للأكواد والـ Client IDs
+│
+├── 📁 "google map (apple and google )"/
+│   ├── 📘 GOOGLE_MAPS_FLUTTER_GUIDE.md            # الدليل الشامل لربط خرائط جوجل وضبط الصلاحيات
+│   ├── 📄 google_map_view_template.dart           # ويدجت خريطة فلاتر جاهز بالكامل (موقع، علامات، ثيم ليلي)
+│   └── 🌐 index.html                              # توثيق تفاعلي مرئي بمخصص حي للمفاتيح والأكواد
 │
 ├── 📁 "ci cd apple and google "/
 │   ├── 📁 android/
@@ -124,6 +137,39 @@ configuration-Apps/
 
 ---
 
+### 5️⃣ تسجيل الدخول الاجتماعي عبر Google و Apple (Social Authentication)
+📂 **المسار:** [`apple and google authentication login`](file:///Users/mohamedgaber/projects/configuration%20Apps/apple%20and%20google%20authentication%20login)
+
+دليل هندسي شامل مع خدمة Dart كاملة للإنتاج لربط تسجيل الدخول بواسطة حسابات جوجل وأبل على نظامي iOS و Android مع دعم الربط التلقائي بـ Firebase أو الـ Backend الخاص بك.
+
+#### ✨ ما يتم تغطيته:
+- **Google Sign-In v7 API:** دعم بنية Google Identity Services الحديثة واستخراج `idToken` و `accessToken`.
+- **Sign in with Apple Security:** توليد وتشفير الـ `Nonce` السري بخوارزمية `SHA-256` لحماية المصادقة من هجمات Replay Attacks.
+- **دعم Android الكامل لـ Apple:** إعداد الـ `Service ID` والـ Intent Filter ونافذة الويب لاستقبال ردود أبل على أجهزة أندرويد.
+- **حلول مشكلات البصمات والأخطاء:** استخراج بصمات SHA-1 و SHA-256 لـ Debug و Release و Google Play App Signing، وحل خطأ `ApiException: 10`، ومعالجة خصوصية أبل (عدم إرسال الاسم إلا في أول مرة).
+- **كود جاهز للإنتاج:** كلاس [`social_auth_service.dart`](file:///Users/mohamedgaber/projects/configuration%20Apps/apple%20and%20google%20authentication%20login/social_auth_service.dart) جاهز للإسقاط المباشر في أي مشروع فلاتر.
+
+> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل تسجيل الدخول بجوجل وأبل](file:///Users/mohamedgaber/projects/configuration%20Apps/apple%20and%20google%20authentication%20login/GOOGLE_AND_APPLE_AUTH_GUIDE.md) أو تصفح [التوثيق المرئي التفاعلي](file:///Users/mohamedgaber/projects/configuration%20Apps/apple%20and%20google%20authentication%20login/index.html).
+
+---
+
+### 6️⃣ تكامل خرائط جوجل على نظامي iOS و Android (Google Maps Mobile)
+📂 **المسار:** [`google map (apple and google )`](file:///Users/mohamedgaber/projects/configuration%20Apps/google%20map%20%28apple%20and%20google%20%29)
+
+دليل عملي متكامل لتضمين وتشغيل خرائط جوجل (Google Maps SDK) في تطبيقات Flutter، مع حلول معتمدة لأصعب مشاكل التمرير والأذونات والشاشات الرمادية.
+
+#### ✨ ما يتم تغطيته:
+- **تهيئة Android:** ضبط `AndroidManifest.xml` وصلاحيات `ACCESS_FINE_LOCATION` وتقييد المفاتيح ببصمات SHA-1.
+- **تهيئة iOS الأنيقة:** قراءة مفتاح `GMSApiKey` ديناميكياً من `Info.plist` داخل `AppDelegate.swift` وضبط نصوص الأذونات لقبول متجر App Store.
+- **تحديد الموقع والملاحة:** جلب إحداثيات المستخدم الحالية وتحريك الكاميرا بسلاسة فائقة عبر `geolocator`.
+- **حل تعارض التمرير (Nested ScrollView Fix):** استخدام `EagerGestureRecognizer` لحل مشكلة توقف تحريك الخريطة عندما تكون داخل صفحات تمرير (Scrollable Views).
+- **الوضع الليلي (Dark Mode):** تلوين وتخصيص الخريطة بستايل ليلي داكن فاخر عبر JSON مخصص.
+- **قالب ويدجت جاهز:** ملف [`google_map_view_template.dart`](file:///Users/mohamedgaber/projects/configuration%20Apps/google%20map%20%28apple%20and%20google%20%29/google_map_view_template.dart) جاهز للاستخدام المباشر في أي صفحة.
+
+> 🔗 **للاطلاع على الدليل الكامل:** اقرأ [دليل خرائط جوجل في Flutter](file:///Users/mohamedgaber/projects/configuration%20Apps/google%20map%20%28apple%20and%20google%20%29/GOOGLE_MAPS_FLUTTER_GUIDE.md) أو تصفح [التوثيق المرئي التفاعلي](file:///Users/mohamedgaber/projects/configuration%20Apps/google%20map%20%28apple%20and%20google%20%29/index.html).
+
+---
+
 ## 🔒 دليل الأمان وحماية المفاتيح | Security Best Practices
 
 > [!WARNING]
@@ -156,6 +202,8 @@ configuration-Apps/
 
 - [x] 🤖 **Google Play CI/CD Pipeline:** سير عمل GitHub Actions لرفع حزم Android App Bundle (`.aab`) تلقائياً إلى مسار الاختبار الداخلي في Google Play Console.
 - [x] 📋 **Multi-Store Metadata Requirements Guide:** دليل متكامل لنماذج الـ Metadata والمتطلبات البصرية للمتاجر الثلاثة.
+- [x] 🔐 **Google & Apple Social Sign-In Master Guide:** دليل وخدمة برمجية موحدة لتسجيل الدخول بجوجل وأبل لنظامي iOS و Android.
+- [x] 🗺️ **Google Maps SDK for iOS & Android Guide & Template:** دليل وقالب ويدجت خرائط جوجل مع معالجة الصلاحيات والـ Dark Mode.
 - [ ] 📊 **TikTok & Snapchat Events SDK:** أدلة ربط وتتبع الإعلانات على المنصات الترويجية الأخرى في تطبيقات Flutter.
 - [ ] 🚀 **Fastlane Integration Template:** نماذج إعداد Fastlane للمشاريع الكبيرة والفرق المتعددة.
 
