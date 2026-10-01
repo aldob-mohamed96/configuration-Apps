@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل CI/CD لنشر تطبيقات Flutter على App Store | الدليل الشامل</title>
+  <meta name="description" content="دليل احترافي متكامل لرفع أي تطبيق Flutter على App Store و TestFlight باستخدام GitHub Actions تلقائياً خطوة بخطوة وبدون أي بيانات خاصة.">
+
+  <!-- Google Fonts: Cairo for Arabic, Inter for English, JetBrains Mono for Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(26, 36, 56, 0.85);
+      --bg-code: #070b14;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.25);
+      --warning: #f59e0b;
+      --danger: #f43f5e;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --sidebar-width: 310px;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(10, 15, 29, 0.92);
+      backdrop-filter: blur(16px);
+      border-left: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      padding: 24px 18px;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 22px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--primary);
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    /* Progress Widget in Sidebar */
+    .progress-box {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .nav-item a:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-color);
+      transform: translateX(-4px);
+    }
+
+    .nav-item.active a {
+      color: var(--primary);
+      background: rgba(56, 189, 248, 0.08);
+      border-color: var(--border-accent);
+      font-weight: 700;
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #1e293b;
+      color: var(--text-dim);
+    }
+
+    .nav-item.active .nav-badge {
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-right: var(--sidebar-width);
+      flex: 1;
+      padding: 40px 48px;
+      max-width: 1200px;
+    }
+
+    @media (max-width: 1080px) {
+      .sidebar {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 24px 20px;
+      }
+    }
+
+    /* Header Hero */
+    .hero {
+      position: relative;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.8) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      margin-bottom: 36px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .hero-badge span.pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+
+    h1.hero-title {
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1.35;
+      color: #ffffff;
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 850px;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+
+    /* Live Variable Replacer Interactive Card */
+    .variable-card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 30px -10px var(--accent-glow);
+    }
+
+    .variable-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .variable-card-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .variable-badge {
+      font-size: 12px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .variable-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .var-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .var-field input {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .var-field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Architecture Flow Diagram */
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 24px 0 10px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    .flow-step-box {
+      flex: 1;
+      min-width: 130px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 10px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step-box .flow-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .flow-step-box .flow-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .flow-step-box .flow-sub {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .flow-arrow {
+      color: var(--text-dim);
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* Sections & Cards */
+    .section-container {
+      margin-bottom: 48px;
+      scroll-margin-top: 30px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .step-check-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: rgba(30, 41, 59, 0.4);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .step-check-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .step-check-btn.completed {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: var(--bg-card-hover);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-text {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+
+    /* Links & Buttons */
+    .portal-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-sm);
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 10px 0 18px;
+      transition: var(--transition);
+    }
+
+    .portal-link:hover {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25));
+      box-shadow: 0 0 15px var(--primary-glow);
+      transform: translateY(-2px);
+      color: #fff;
+    }
+
+    /* Callout & Alert Boxes */
+    .callout {
+      border-right: 4px solid var(--primary);
+      background: rgba(56, 189, 248, 0.05);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 14px;
+      color: #e2e8f0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .callout.warning {
+      border-right-color: var(--warning);
+      background: rgba(245, 158, 11, 0.07);
+    }
+
+    .callout.success {
+      border-right-color: var(--success);
+      background: rgba(16, 185, 129, 0.07);
+    }
+
+    .callout.danger {
+      border-right-color: var(--danger);
+      background: rgba(244, 63, 94, 0.07);
+    }
+
+    .callout-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .callout-content {
+      flex: 1;
+    }
+
+    .callout-title {
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .code-lang-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .code-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    .code-content {
+      padding: 16px 20px;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre;
+    }
+
+    /* Syntax Highlighting Sim */
+    .token-comment { color: #64748b; font-style: italic; }
+    .token-keyword { color: #f43f5e; font-weight: 600; }
+    .token-string { color: #34d399; }
+    .token-variable { color: #38bdf8; font-weight: 600; }
+    .token-key { color: #a78bfa; font-weight: 600; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin: 18px 0;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: right;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.8);
+      color: #fff;
+      padding: 14px 18px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 18px;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: #fff;
+    }
+
+    .code-tag {
+      display: inline-block;
+      direction: ltr;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Tabs */
+    .tab-header {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Troubleshooting Search Box */
+    .search-box {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 14px 48px 14px 18px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      box-shadow: 0 0 20px var(--primary-glow);
+      border-color: var(--primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: rgba(16, 185, 129, 0.95);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition);
+      z-index: 9999;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0 20px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span>✓</span>
+    <span id="toast-msg">تم النسخ إلى الحافظة بنجاح!</span>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon"></div>
+        <div>
+          <div class="brand-title">دليل CI/CD لـ App Store</div>
+          <div class="brand-sub">GITHUB ACTIONS • FLUTTER</div>
+        </div>
+      </div>
+
+      <!-- Live Progress -->
+      <div class="progress-box">
+        <div class="progress-header">
+          <span>تقدم إعداد خطوات النشر</span>
+          <span id="progress-percent" style="color: var(--primary);">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <ul class="nav-links">
+        <li class="nav-item"><a href="#prerequisites"><span> المتطلبات الأساسية</span><span class="nav-badge">1</span></a></li>
+        <li class="nav-item"><a href="#step1-api-key"><span>1. مفتاح App Store API</span><span class="nav-badge">2</span></a></li>
+        <li class="nav-item"><a href="#step2-certificate"><span>2. شهادة التوزيع (.p12)</span><span class="nav-badge">3</span></a></li>
+        <li class="nav-item"><a href="#step3-provisioning"><span>3. الـ Provisioning Profile</span><span class="nav-badge">4</span></a></li>
+        <li class="nav-item"><a href="#step4-base64"><span>4. تحويل الملفات إلى Base64</span><span class="nav-badge">5</span></a></li>
+        <li class="nav-item"><a href="#step5-secrets"><span>5. إضافة GitHub Secrets</span><span class="nav-badge">6</span></a></li>
+        <li class="nav-item"><a href="#step6-xcode-config"><span>6. إعدادات المشروع و Xcode</span><span class="nav-badge">7</span></a></li>
+        <li class="nav-item"><a href="#step7-workflow"><span>7. ملف Workflow الكامل</span><span class="nav-badge">8</span></a></li>
+        <li class="nav-item"><a href="#step8-release-strategy"><span>8. آلية الرفع التلقائي</span><span class="nav-badge">9</span></a></li>
+        <li class="nav-item"><a href="#step9-troubleshooting"><span>9. سجل حل المشاكل الشائعة</span><span class="nav-badge">10</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- Hero Header -->
+      <section class="hero">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          UNIVERSAL CI/CD PIPELINE • FOR ANY FLUTTER APP
+        </div>
+        <h1 class="hero-title">الدليل الشامل لأتمتة رفع تطبيقات Flutter إلى App Store Connect و TestFlight عبر GitHub Actions</h1>
+        <p class="hero-desc">
+          دليل عملي ونهائي تم إعداده ليكون عاماً تماماً وخالياً من أي بيانات خاصة؛ لكي تتمكن من استخدامه في أي تطبيق ومستودع جديد خلال دقائق. يشمل الدليل التوليد الآمن للشهادات، حل معضلات التشفير، وإعداد سكريبت ذكي يزيد رقم الإصدار (Build Number) تلقائياً مع كل رفع.
+        </p>
+
+        <!-- Pipeline Overview -->
+        <div class="flow-diagram">
+          <div class="flow-step-box">
+            <div class="flow-icon">💻</div>
+            <div class="flow-title">Git Push / Merge</div>
+            <div class="flow-sub">على برانش release</div>
+          </div>
+          <div class="flow-arrow">←</div>
+          <div class="flow-step-box">
+            <div class="flow-icon">⚙️</div>
+            <div class="flow-title">GitHub Actions</div>
+            <div class="flow-sub">سيرفر macOS الرسمي</div>
+          </div>
+          <div class="flow-arrow">←</div>
+          <div class="flow-step-box">
+            <div class="flow-icon">🔑</div>
+            <div class="flow-title">تثبيت الشهادات</div>
+            <div class="flow-sub">Keychain + Profile</div>
+          </div>
+          <div class="flow-arrow">←</div>
+          <div class="flow-step-box">
+            <div class="flow-icon">📦</div>
+            <div class="flow-title">بناء حزمة IPA</div>
+            <div class="flow-sub">Auto-Increment Build</div>
+          </div>
+          <div class="flow-arrow">←</div>
+          <div class="flow-step-box">
+            <div class="flow-icon">🚀</div>
+            <div class="flow-title">App Store Connect</div>
+            <div class="flow-sub">جاهز على TestFlight</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Interactive Variables Customizer -->
+      <section class="variable-card">
+        <div class="variable-card-header">
+          <div class="variable-card-title">
+            <span>⚡ خصّص بيانات تطبيقك المباشرة (Live Template Customizer)</span>
+          </div>
+          <span class="variable-badge">تحديث فوري لجميع الأكواد أدناه</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          اكتب معرّفات تطبيقك هنا، وسيتم استبدالها تلقائياً وبشكل فوري داخل كل الأوامر والملفات المكتوبة في هذا الدليل لتنسخها جاهزة بدون خطأ:
+        </p>
+        <div class="variable-grid">
+          <div class="var-field">
+            <label>معرف التطبيق (Bundle Identifier)</label>
+            <input type="text" id="input-bundle-id" value="com.yourcompany.yourapp" placeholder="com.company.app">
+          </div>
+          <div class="var-field">
+            <label>معرف الفريق (Apple Team ID)</label>
+            <input type="text" id="input-team-id" value="YOUR_TEAM_ID" placeholder="ABC123XYZ4">
+          </div>
+          <div class="var-field">
+            <label>اسم بروفايل التوزيع (Profile Name)</label>
+            <input type="text" id="input-profile-name" value="YourApp_AppStore" placeholder="AppStore_Profile">
+          </div>
+          <div class="var-field">
+            <label>البريد الإلكتروني لحساب Apple</label>
+            <input type="text" id="input-email" value="developer@yourcompany.com" placeholder="dev@email.com">
+          </div>
+        </div>
+      </section>
+
+      <!-- Prerequisites -->
+      <section id="prerequisites" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">0</div>
+            <span>المتطلبات الأساسية قبل البدء</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(0, this)">
+            <span>✓</span> تم التحقق
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-text">
+            قبل الشروع في كتابة الأوامر، تأكد من توفر الآتي لدى فريقك:
+          </div>
+          <ul style="padding-right: 20px; color: var(--text-muted); font-size: 14px; line-height: 2;">
+            <li>حساب <strong>Apple Developer Program</strong> نشط (سواء كان حساب شركة أو فرد).</li>
+            <li>وجود تطبيق مسجل في <a href="https://appstoreconnect.apple.com/apps" target="_blank" style="color: var(--primary);">App Store Connect > Apps</a> يحمل نفس الـ Bundle ID.</li>
+            <li>مستودع المشروع مرفوع ومُدار على <strong>GitHub</strong> ولديك صلاحيات Admin لإضافة الـ Secrets.</li>
+            <li>جهاز Mac لتوليد شهادة التوزيع أول مرة فقط (أو استخدام أوامر OpenSSL الموضحة بالأسفل).</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Step 1: App Store Connect API Key -->
+      <section id="step1-api-key" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">1</div>
+            <span>استخراج مفتاح App Store Connect API</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(1, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">لماذا نحتاج هذا المفتاح؟</div>
+          <div class="card-text">
+            يُتيح هذا المفتاح لسيرفرات GitHub Actions رفع الحزمة إلى App Store Connect مباشرة عبر أداة Apple الرسمية (<code class="code-tag">xcrun altool</code>) دون الحاجة لإدخال بريد وكلمة مرور أو طلب كود التحقق الثنائي (2FA).
+          </div>
+
+          <a href="https://appstoreconnect.apple.com/access/integrations/api" target="_blank" class="portal-link">
+            <span>🔗</span> انتقال مباشر إلى صفحة: App Store Connect > Users and Access > Integrations
+          </a>
+
+          <ol style="padding-right: 24px; color: var(--text-muted); font-size: 14px; line-height: 2.1; margin-bottom: 16px;">
+            <li>افتح الرابط أعلاه وسجل دخولك بحساب المطور.</li>
+            <li>إذا كانت هذه أول مرة، اضغط زر <strong>Request Access</strong> ووافق على اتفاقية استخدام الـ API.</li>
+            <li>تحت قسم <strong>Team Keys</strong>، اضغط على علامة الزائد <strong>`+`</strong> لإنشاء مفتاح جديد:
+              <ul style="padding-right: 20px; list-style-type: square; margin-top: 6px;">
+                <li><strong>Name:</strong> اكتب اسماً واضحاً مثل <code class="code-tag">GitHub Actions Deployer</code>.</li>
+                <li><strong>Access:</strong> اختر صلاحية <code class="code-tag">App Manager</code> أو <code class="code-tag">Admin</code> (لتتمكن الأداة من الرفع وإدارة الإصدارات).</li>
+              </ul>
+            </li>
+            <li>اضغط <strong>Generate</strong>.</li>
+            <li>ستظهر البيانات التالية (احفظها في ملف نصي آمن):
+              <ul style="padding-right: 20px; list-style-type: square; margin-top: 6px;">
+                <li><strong>Key ID:</strong> كود مكون من 10 خانات أبجدية ورقمية (مثال: <code class="code-tag">U5943UX5VN</code>).</li>
+                <li><strong>Issuer ID:</strong> كود UUID يظهر أعلى الجدول (مثال: <code class="code-tag">7b528716-19b5-407f-98dc-9ae2e3fab928</code>).</li>
+                <li><strong>ملف المفتاح (.p8):</strong> اضغط على <strong>Download API Key</strong> لتحميل الملف.</li>
+              </ul>
+            </li>
+          </ol>
+
+          <div class="callout warning">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-content">
+              <div class="callout-title">تنبيه هام جداً بخصوص ملف الـ .p8:</div>
+              زر تحميل ملف الـ API Key يظهر <strong>لمرة واحدة فقط</strong> في بوابة أبل. إذا ضاع منك الملف فلن تتمكن من تحميله ثانية وستضطر لإنشاء مفتاح جديد (Revoke & Create New).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Distribution Certificate -->
+      <section id="step2-certificate" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">2</div>
+            <span>إنشاء شهادة التوزيع Apple Distribution (.p12)</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(2, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">توليد الشهادة والمفتاح الخاص بشكل آمن عبر الـ Terminal</div>
+          <div class="card-text">
+            لتفادي أي تعقيد أو مشاكل تصدير من برنامج Keychain Access، سنولد طلب توقيع الشهادة (CSR) والمفتاح الخاص، ثم ندمجها في ملف <code class="code-tag">.p12</code> محمي بكلمة مرور:
+          </div>
+
+          <h4 style="color: var(--primary); margin: 16px 0 8px;">أ) توليد ملف طلب الشهادة (CSR) والمفتاح الخاص:</h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">افتح الـ Terminal في أي مجلد فارغ ونفذ الأمر التالي:</p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-badge">Terminal (Bash)</span>
+              <div class="code-actions">
+                <button class="copy-btn" onclick="copySnippet(this)">نسخ الأمر</button>
+              </div>
+            </div>
+            <div class="code-content"><span class="token-comment"># 1. إنشاء المفتاح الخاص وملف طلب الشهادة CSR</span>
+openssl req -nodes -newkey rsa:2048 \
+  -keyout distribution_private_key.key \
+  -out CertificateSigningRequest.certSigningRequest \
+  -subj "/emailAddress=<span class="dyn-email">developer@yourcompany.com</span>/CN=Apple Distribution/C=US"</div>
+          </div>
+
+          <h4 style="color: var(--primary); margin: 24px 0 8px;">ب) رفع ملف الـ CSR وتحميل شهادة Apple:</h4>
+          <a href="https://developer.apple.com/account/resources/certificates/list" target="_blank" class="portal-link">
+            <span>🔗</span> بوابة Apple Developer: قائمة الشهادات (Certificates)
+          </a>
+          <ol style="padding-right: 24px; color: var(--text-muted); font-size: 14px; line-height: 2;">
+            <li>اضغط علامة الزائد <strong>`+`</strong> لإنشاء شهادة جديدة.</li>
+            <li>اختر نوع الشهادة: <strong>Apple Distribution</strong> ثم اضغط <strong>Continue</strong>.</li>
+            <li>ارفع ملف <code class="code-tag">CertificateSigningRequest.certSigningRequest</code> الذي تم توليده.</li>
+            <li>اضغط <strong>Generate</strong> ثم اضغط <strong>Download</strong> لتحميل الشهادة (اسمها: <code class="code-tag">distribution.cer</code>).</li>
+          </ol>
+
+          <h4 style="color: var(--primary); margin: 24px 0 8px;">ج) دمج الشهادة مع المفتاح الخاص وتوليد ملف .p12:</h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+            ضع ملف <code class="code-tag">distribution.cer</code> في نفس المجلد الذي يحتوي على المفتاح الخاص، ثم نفذ:
+          </p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-badge">Terminal (Bash)</span>
+              <div class="code-actions">
+                <button class="copy-btn" onclick="copySnippet(this)">نسخ الأوامر</button>
+              </div>
+            </div>
+            <div class="code-content"><span class="token-comment"># 1. تحويل الشهادة من تنسيق DER إلى PEM</span>
+openssl x509 -in distribution.cer -inform DER -out distribution.pem -outform PEM
+
+<span class="token-comment"># 2. إنشاء ملف .p12 متوافق مع نظام ماك وسيرفرات CI/CD (هام: استخدم /usr/bin/openssl)</span>
+/usr/bin/openssl pkcs12 -export \
+  -inkey distribution_private_key.key \
+  -in distribution.pem \
+  -out distribution.p12 \
+  -passout pass:YOUR_P12_PASSWORD</div>
+          </div>
+
+          <div class="callout warning">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <div class="callout-title">سر عدم حدوث خطأ "Unknown format in import":</div>
+              استخدام <code class="code-tag">/usr/bin/openssl</code> المدمج في نظام macOS هو الذي يضمن تشفير ملف الـ p12 بخوارزميات Legacy المتوافقة مع أداة security داخل سيرفرات GitHub، وتجنب خوارزميات OpenSSL 3 الحديثة التي تسبب فشل استيراد الشهادة على الـ CI.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Provisioning Profile -->
+      <section id="step3-provisioning" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">3</div>
+            <span>إنشاء ملف الـ Provisioning Profile (.mobileprovision)</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(3, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">ربط التطبيق والشهادة وتجهيز بروفايل الـ App Store</div>
+          <div class="card-text">
+            يحدد الـ Provisioning Profile لشركة Apple أن تطبيقك مصرح له بالنشر على المتجر باستخدام شهادة التوزيع المعتمدة:
+          </div>
+
+          <a href="https://developer.apple.com/account/resources/profiles/list" target="_blank" class="portal-link">
+            <span>🔗</span> بوابة Apple Developer: قائمة الـ Provisioning Profiles
+          </a>
+
+          <ol style="padding-right: 24px; color: var(--text-muted); font-size: 14px; line-height: 2.1;">
+            <li>اضغط على علامة <strong>`+`</strong> لإنشاء بروفايل جديد.</li>
+            <li>تحت قسم <strong>Distribution</strong>، اختر <strong>App Store</strong> ثم اضغط <strong>Continue</strong>.</li>
+            <li><strong>App ID:</strong> اختر التطبيق الخاص بك (<code class="code-tag dyn-bundle">com.yourcompany.yourapp</code>).</li>
+            <li><strong>Certificates:</strong> اختر شهادة <em>Apple Distribution</em> التي تم إنشاؤها في الخطوة السابقة.</li>
+            <li><strong>Profile Name:</strong> اكتب اسماً دقيقاً ومعبراً (مثال: <code class="code-tag dyn-profile">YourApp_AppStore</code>).</li>
+            <li>اضغط <strong>Generate</strong> ثم <strong>Download</strong> لتحميل الملف (امتداده <code class="code-tag">.mobileprovision</code>).</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Step 4: Base64 Encoding -->
+      <section id="step4-base64" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">4</div>
+            <span>تحويل الملفات إلى Base64 لإضافتها في GitHub Secrets</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(4, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">تشفير الملفات الثنائية كنصوص نصية نقية</div>
+          <div class="card-text">
+            لا يقبل GitHub تخزين ملفات binary مباشرة داخل الـ Secrets، لذلك نقوم بتحويل الملفات الثلاثة إلى نصوص Base64 بواسطة التيرمينال:
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-badge">Terminal (macOS / Linux)</span>
+              <div class="code-actions">
+                <button class="copy-btn" onclick="copySnippet(this)">نسخ أوامر Base64</button>
+              </div>
+            </div>
+            <div class="code-content"><span class="token-comment"># 1. تحويل مفتاح الـ API (.p8)</span>
+base64 -i AuthKey_XXXXXXXXXX.p8 -o api_key_base64.txt
+
+<span class="token-comment"># 2. تحويل شهادة التوزيع (.p12)</span>
+base64 -i distribution.p12 -o cert_base64.txt
+
+<span class="token-comment"># 3. تحويل ملف الـ Provisioning Profile (.mobileprovision)</span>
+base64 -i <span class="dyn-profile">YourApp_AppStore</span>.mobileprovision -o profile_base64.txt</div>
+          </div>
+
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 10px;">
+            ستظهر لك الآن 3 ملفات نصية (<code class="code-tag">.txt</code>)، سنقوم بنسخ محتوى كل ملف بالكامل واستخدامه في الخطوة التالية.
+          </p>
+        </div>
+      </section>
+
+      <!-- Step 5: GitHub Secrets -->
+      <section id="step5-secrets" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">5</div>
+            <span>إضافة الـ Secrets في مستودع GitHub</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(5, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">قائمة المتغيرات السرية السبعة (Repository Secrets)</div>
+          <div class="card-text">
+            ادخل على مستودع مشروعك على GitHub ثم توجه إلى المسار التالي:
+            <br>
+            <strong style="color: #fff;">Settings</strong> ➔ <strong style="color: #fff;">Secrets and variables</strong> ➔ <strong style="color: #fff;">Actions</strong> ➔ اضغط <strong style="color: var(--primary);">New repository secret</strong>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم السر (Secret Name)</th>
+                  <th>الوصف ومصدر القيمة</th>
+                  <th>مثال توضيحي</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code class="code-tag">APP_STORE_CONNECT_KEY_ID</code></td>
+                  <td>معرف المفتاح المكون من 10 خانات والمستخرج من الخطوة 1</td>
+                  <td><span style="font-family: monospace;">U5943UX5VN</span></td>
+                </tr>
+                <tr>
+                  <td><code class="code-tag">APP_STORE_CONNECT_ISSUER_ID</code></td>
+                  <td>معرف الـ Issuer (UUID) الموجود أعلى صفحة Keys في Apple</td>
+                  <td><span style="font-family: monospace;">7b528716-19b5-407f-...</span></td>
+                </tr>
+                <tr>
+                  <td><code class="code-tag">APP_STORE_CONNECT_PRIVATE_KEY_BASE64</code></td>
+                  <td>محتوى ملف <code class="code-tag">api_key_base64.txt</code> كاملاً بدون أي مسافات زائدة</td>
+                  <td>نص Base64 يبدأ بـ <span style="font-family: monospace;">LS0tLS...</span></td>
+                </tr>
+                <tr>
+                  <td><code class="code-tag">BUILD_CERTIFICATE_BASE64</code></td>
+                  <td>محتوى ملف <code class="code-tag">cert_base64.txt</code> (الشهادة المشفرة)</td>
+                  <td>نص Base64 كامل</td>
+                </tr>
+                <tr>
+                  <td><code class="code-tag">P12_PASSWORD</code></td>
+                  <td>كلمة السر التي اخترتها لحماية ملف <code class="code-tag">distribution.p12</code></td>
+                  <td>كلمة المرور السرية الخاصة بك</td>
+                </tr>
+                <tr>
+                  <td><code class="code-tag">BUILD_PROVISION_PROFILE_BASE64</code></td>
+                  <td>محتوى ملف <code class="code-tag">profile_base64.txt</code> كاملاً</td>
+                  <td>نص Base64 كامل</td>
+                </tr>
+                <tr>
+                  <td><code class="code-tag">KEYCHAIN_PASSWORD</code></td>
+                  <td>أي كلمة مرور عشوائية لفتح الكي تشين المؤقت في سيرفر البناء</td>
+                  <td><span style="font-family: monospace;">AutoCiKeychainPass2026!</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 6: Project & Xcode Configuration -->
+      <section id="step6-xcode-config" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">6</div>
+            <span>إعدادات ملفات المشروع (ExportOptions & Info.plist)</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(6, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="tab-header">
+            <button class="tab-btn active" onclick="switchTab('tab-export', this)">1. ios/ExportOptions.plist</button>
+            <button class="tab-btn" onclick="switchTab('tab-info', this)">2. ios/Runner/Info.plist</button>
+            <button class="tab-btn" onclick="switchTab('tab-xcconfig', this)">3. ios/Flutter/Release.xcconfig</button>
+          </div>
+
+          <!-- Tab 1: ExportOptions -->
+          <div id="tab-export" class="tab-content active">
+            <p class="card-text">
+              ملف أساسي يخبر محرك <code class="code-tag">xcodebuild</code> بكيفية توقيع وتصدير حزمة الـ IPA تلقائياً دون الحاجة لواجهة Xcode الرسومية:
+            </p>
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-badge">XML • ios/ExportOptions.plist</span>
+                <div class="code-actions">
+                  <button class="copy-btn" onclick="copySnippet(this)">نسخ الملف</button>
+                </div>
+              </div>
+              <div class="code-content">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+	&lt;key&gt;method&lt;/key&gt;
+	&lt;string&gt;app-store&lt;/string&gt;
+	&lt;key&gt;teamID&lt;/key&gt;
+	&lt;string&gt;<span class="dyn-team">YOUR_TEAM_ID</span>&lt;/string&gt;
+	&lt;key&gt;signingStyle&lt;/key&gt;
+	&lt;string&gt;manual&lt;/string&gt;
+	&lt;key&gt;provisioningProfiles&lt;/key&gt;
+	&lt;dict&gt;
+		&lt;key&gt;<span class="dyn-bundle">com.yourcompany.yourapp</span>&lt;/key&gt;
+		&lt;string&gt;<span class="dyn-profile">YourApp_AppStore</span>&lt;/string&gt;
+	&lt;/dict&gt;
+	&lt;key&gt;destination&lt;/key&gt;
+	&lt;string&gt;export&lt;/string&gt;
+	&lt;key&gt;uploadSymbols&lt;/key&gt;
+	&lt;true/&gt;
+	&lt;key&gt;compileBitcode&lt;/key&gt;
+	&lt;false/&gt;
+	&lt;key&gt;stripSwiftSymbols&lt;/key&gt;
+	&lt;true/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Info.plist -->
+          <div id="tab-info" class="tab-content">
+            <p class="card-text">
+              تأكد من أن ملف <code class="code-tag">ios/Runner/Info.plist</code> يقرأ رقم الإصدار والـ Build من متغيرات Flutter بدلاً من الأرقام الثابتة:
+            </p>
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-badge">XML Snippet • ios/Runner/Info.plist</span>
+                <div class="code-actions">
+                  <button class="copy-btn" onclick="copySnippet(this)">نسخ المقطع</button>
+                </div>
+              </div>
+              <div class="code-content">&lt;key&gt;CFBundleShortVersionString&lt;/key&gt;
+&lt;string&gt;$(FLUTTER_BUILD_NAME)&lt;/string&gt;
+&lt;key&gt;CFBundleVersion&lt;/key&gt;
+&lt;string&gt;$(FLUTTER_BUILD_NUMBER)&lt;/string&gt;</div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Release.xcconfig -->
+          <div id="tab-xcconfig" class="tab-content">
+            <p class="card-text">
+              أضف هذه الأسطر في ملف <code class="code-tag">ios/Flutter/Release.xcconfig</code> لإجبار Xcode على التوقيع اليدوي ومنعه من محاولة البحث الأونلاين عن حسابات Apple أثناء تشغيل السيرفر السحابي:
+            </p>
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-badge">xcconfig • ios/Flutter/Release.xcconfig</span>
+                <div class="code-actions">
+                  <button class="copy-btn" onclick="copySnippet(this)">نسخ الأسطر</button>
+                </div>
+              </div>
+              <div class="code-content">CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = Apple Distribution
+PROVISIONING_PROFILE_SPECIFIER = <span class="dyn-profile">YourApp_AppStore</span>
+DEVELOPMENT_TEAM = <span class="dyn-team">YOUR_TEAM_ID</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 7: GitHub Actions Workflow -->
+      <section id="step7-workflow" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">7</div>
+            <span>ملف الـ Workflow الكامل (.github/workflows/deploy_ios.yml)</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(7, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">الملف الشامل المعتمد والجاهز للاستخدام الفوري</div>
+          <div class="card-text">
+            أنشئ ملفاً جديداً في مشروعك بالمسار: <code class="code-tag">.github/workflows/deploy_ios.yml</code> والصق الكود التالي. يتميز هذا الملف بـ:
+            <ul style="padding-right: 20px; font-size: 13.5px; color: var(--text-muted); margin-top: 8px;">
+              <li>الزيادة التلقائية التراكمية لرقم الإصدار (Auto-Increment Build Number) عبر رقم عملية الرفع <code class="code-tag">GITHUB_RUN_NUMBER</code>.</li>
+              <li>إمكانية تحديد Build Number يدوي اختياري عند تشغيل الـ Workflow يدوياً.</li>
+              <li>معالجة تلقائية لـ Base64 Padding عبر بايثون لتفادي خطأ <code class="code-tag">binascii.Error: Incorrect padding</code>.</li>
+              <li>إعداد المفتاح الخاص لـ App Store Connect في المسار الصحيح المعتمد من Apple.</li>
+            </ul>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-badge">YAML • .github/workflows/deploy_ios.yml</span>
+              <div class="code-actions">
+                <button class="copy-btn" onclick="copySnippet(this)">نسخ ملف الـ Workflow كاملاً</button>
+              </div>
+            </div>
+            <div class="code-content">name: Deploy iOS to App Store
+
+on:
+  push:
+    branches:
+      - release # يعمل تلقائياً عند الدفع أو الدمج في برانش release
+  pull_request:
+    branches:
+      - release # تشغيل الفحص عند إنشاء Pull Request على برانش release
+  workflow_dispatch:
+    inputs:
+      custom_build_number:
+        description: 'رقم إصدار محدد يدوياً (اختياري - اتركه فارغاً للزيادة التلقائية)'
+        required: false
+        default: ''
+
+jobs:
+  deploy:
+    name: Build & Upload to App Store
+    runs-on: macos-26 # يحتوي على أحدث بيئات Xcode و iOS SDK المعتمدين من Apple
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify Xcode & iOS SDK
+        run: |
+          xcodebuild -version
+          echo "iOS SDK: $(xcrun --show-sdk-version --sdk iphoneos)"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Calculate Version & Auto-Increment Build Number
+        id: versioning
+        run: |
+          # 1. استخراج رقم النسخة والـ Build الحالي من pubspec.yaml
+          RAW_VERSION=$(grep '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*//')
+          VERSION_NAME=$(echo "$RAW_VERSION" | cut -d'+' -f1)
+          BASE_BUILD=$(echo "$RAW_VERSION" | cut -d'+' -f2)
+
+          if [ -z "$BASE_BUILD" ] || [ "$BASE_BUILD" = "$VERSION_NAME" ]; then
+            BASE_BUILD=1
+          fi
+
+          # 2. فحص إذا كان هناك Build Number مدخل يدوياً عبر workflow_dispatch
+          CUSTOM_BUILD="${{ inputs.custom_build_number }}"
+          if [ -n "$CUSTOM_BUILD" ]; then
+            BUILD_NUMBER="$CUSTOM_BUILD"
+          else
+            # زيادة تلقائية تصاعدية تراكمية مع كل عملية تشغيل على جيت هب
+            BUILD_NUMBER=$(( BASE_BUILD + GITHUB_RUN_NUMBER ))
+          fi
+
+          # 3. حقن رقم الإصدار والـ Build في pubspec.yaml و Xcode لضمان التوافق التام
+          sed -i '' "s/^version:.*/version: $VERSION_NAME+$BUILD_NUMBER/g" pubspec.yaml
+          if [ -f ios/Runner.xcodeproj/project.pbxproj ]; then
+            sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" ios/Runner.xcodeproj/project.pbxproj
+            sed -i '' "s/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = $VERSION_NAME;/g" ios/Runner.xcodeproj/project.pbxproj
+          fi
+
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "========================================="
+          echo "🚀 Deploying Version: $VERSION_NAME (Build $BUILD_NUMBER)"
+          echo "========================================="
+
+      - name: Install Apple Certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          CERT_PATH: ${{ runner.temp }}/certificate.p12
+          KEYCHAIN_PATH: ${{ runner.temp }}/app-signing.keychain-db
+        run: |
+          # فك تشفير الشهادة باستخدام بايثون مع معالجة الـ padding تلقائياً
+          python3 -c "import base64, os; s = os.environ['BUILD_CERTIFICATE_BASE64'].strip(); s += '=' * (-len(s) % 4); open(os.environ['CERT_PATH'], 'wb').write(base64.b64decode(s))"
+          /usr/bin/openssl pkcs12 -in "$CERT_PATH" -noout -info -passin "pass:$P12_PASSWORD"
+
+          # إنشاء Keychain مؤقت وإضافته لقائمة البحث
+          /usr/bin/security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          /usr/bin/security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          /usr/bin/security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          /usr/bin/security list-keychains -d user -s "$KEYCHAIN_PATH" $(/usr/bin/security list-keychains -d user | tr -d '"')
+
+          # استيراد الشهادة إلى Keychain وتفويض codesign
+          /usr/bin/security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          /usr/bin/security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+      - name: Install Provisioning Profile
+        env:
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          PP_PATH: ${{ runner.temp }}/app_distribution.mobileprovision
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          python3 -c "import base64, os; s = os.environ['BUILD_PROVISION_PROFILE_BASE64'].strip(); s += '=' * (-len(s) % 4); open(os.environ['PP_PATH'], 'wb').write(base64.b64decode(s))"
+
+          # استخراج الـ UUID واسم البروفايل تلقائياً بدون كتابة أي بيانات خاصة لأي تطبيق
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i "$PP_PATH") 2>/dev/null || echo "")
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< $(security cms -D -i "$PP_PATH") 2>/dev/null || echo "")
+
+          echo "Extracted Profile Name: $PROFILE_NAME"
+          echo "Extracted Profile UUID: $PROFILE_UUID"
+
+          if [ -n "$PROFILE_UUID" ]; then
+            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/${PROFILE_UUID}.mobileprovision
+          fi
+          if [ -n "$PROFILE_NAME" ]; then
+            cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/${PROFILE_NAME}.mobileprovision"
+          fi
+          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/AppStore.mobileprovision
+
+      - name: Setup Environment Files (Optional)
+        env:
+          APP_ENV_BASE64: ${{ secrets.APP_ENV_BASE64 }}
+        run: |
+          # في حال كان التطبيق يعتمد على ملفات .env مشفرة كـ Secret
+          mkdir -p env
+          if [ -n "$APP_ENV_BASE64" ]; then
+            echo "$APP_ENV_BASE64" | base64 --decode > env/.env
+          elif [ ! -f env/.env ]; then
+            touch env/.env
+          fi
+
+      - name: Install Dependencies
+        run: |
+          flutter config --no-enable-swift-package-manager
+          mkdir -p build/ios/SourcePackages
+          flutter pub get
+
+      - name: Prepare CocoaPods
+        run: |
+          if [ -f ios/install_pods.sh ]; then
+            bash ios/install_pods.sh
+          else
+            cd ios && pod install --repo-update
+          fi
+
+      - name: Build iOS IPA
+        run: |
+          flutter build ipa --release \
+            --build-name="$VERSION_NAME" \
+            --build-number="$BUILD_NUMBER" \
+            --export-options-plist=ios/ExportOptions.plist
+
+      - name: Upload to App Store Connect / TestFlight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          mkdir -p ~/.private_keys
+          python3 -c "import base64, os; s = os.environ['APP_STORE_CONNECT_PRIVATE_KEY_BASE64'].strip(); s += '=' * (-len(s) % 4); open(os.path.expanduser('~/.appstoreconnect/private_keys/AuthKey_' + os.environ['APP_STORE_CONNECT_KEY_ID'] + '.p8'), 'wb').write(base64.b64decode(s))"
+          cp ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8 ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8
+
+          IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
+
+          if [ -z "$IPA_PATH" ]; then
+            echo "❌ Error: IPA file not found in build/ios/ipa"
+            exit 1
+          fi
+
+          echo "🚀 Uploading $IPA_PATH to App Store Connect..."
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+          
+          echo "✅ Upload completed successfully to App Store Connect!"</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 8: Execution & Release Strategy -->
+      <section id="step8-release-strategy" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">8</div>
+            <span>استراتيجية فرع `release` والتشغيل</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(8, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">كيف تنشر إصداراً جديداً بأمان؟</div>
+          <div class="card-text">
+            تم ضبط الـ Workflow ليعمل فقط عند الرفع على برانش محدد اسمه <code class="code-tag">release</code> لتوفير استهلاك دقائق GitHub Actions وعدم إطلاق الرفع مع كل تعديل عادي في الكود:
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-badge">Git Terminal Commands</span>
+              <div class="code-actions">
+                <button class="copy-btn" onclick="copySnippet(this)">نسخ الأوامر</button>
+              </div>
+            </div>
+            <div class="code-content"><span class="token-comment"># 1. الانتقال إلى فرع release</span>
+git checkout release
+
+<span class="token-comment"># 2. دمج التعديلات من فرع التطوير الرئيسي (مثال: main أو dev)</span>
+git merge main
+
+<span class="token-comment"># 3. إرسال التحديثات لبدء الرفع التلقائي فوراً</span>
+git push origin release</div>
+          </div>
+
+          <h4 style="color: var(--primary); margin: 20px 0 10px;">التشغيل اليدوي (Manual Dispatch):</h4>
+          <p class="card-text">
+            يمكنك أيضاً تشغيل النشر في أي لحظة دون عمل Push:
+            <br>
+            ادخل على مستودعك ➔ تبويب <strong>Actions</strong> ➔ اختر <strong>Deploy iOS to App Store</strong> ➔ اضغط <strong>Run workflow</strong> ➔ حدد الفرع واضغط تشغيل.
+          </p>
+        </div>
+      </section>
+
+      <!-- Step 9: Troubleshooting Guide -->
+      <section id="step9-troubleshooting" class="section-container">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="step-number">9</div>
+            <span>سجل حل المشكلات والأخطاء الشائعة (Troubleshooting Hub)</span>
+          </div>
+          <button class="step-check-btn" onclick="toggleStep(9, this)">
+            <span>✓</span> تم الإنجاز
+          </button>
+        </div>
+
+        <!-- Search input for errors -->
+        <div class="search-box">
+          <input type="text" id="trouble-search" class="search-input" placeholder="ابحث عن أي رسالة خطأ، مثل: padding, Keychain, SPM, SDK, altool..." onkeyup="filterTroubles()">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <div id="trouble-cards-container">
+
+          <!-- Error 1 -->
+          <div class="card trouble-item">
+            <div class="card-title" style="color: var(--danger);">
+              <span>❌</span> SecKeychainItemImport: Unknown format in import
+            </div>
+            <div class="card-text">
+              <strong>السبب:</strong> تم إنشاء ملف الشهادة <code class="code-tag">.p12</code> باستخدام OpenSSL 3 الحديث بنظام تشفير AES-256 الذي لا تتعرف عليه أداة <code class="code-tag">security</code> الكلاسيكية في macOS.
+            </div>
+            <div class="callout success">
+              <div class="callout-icon">✅</div>
+              <div class="callout-content">
+                <strong>الحل:</strong> أنشئ الـ p12 باستخدام مسار <code class="code-tag">/usr/bin/openssl</code> المدمج في نظام ماك، وتأكد أن الملف المؤقت المستخرج في السيرفر يحمل امتداد <code class="code-tag">.p12</code>.
+              </div>
+            </div>
+          </div>
+
+          <!-- Error 2 -->
+          <div class="card trouble-item">
+            <div class="card-title" style="color: var(--danger);">
+              <span>❌</span> binascii.Error: Incorrect padding
+            </div>
+            <div class="card-text">
+              <strong>السبب:</strong> نصوص الـ Base64 قد تفقد إشارات التكميل (<code class="code-tag">=</code>) عند حفظها في GitHub Secrets أو تمريرها كمتغيرات بيئية.
+            </div>
+            <div class="callout success">
+              <div class="callout-icon">✅</div>
+              <div class="callout-content">
+                <strong>الحل:</strong> استخدام سطر فك التشفير الذكي في بايثون المعتمد في الـ Workflow:
+                <br>
+                <code class="code-tag">s += '=' * (-len(s) % 4)</code> والذي يقوم بإصلاح الـ padding تلقائياً قبل فك التشفير.
+              </div>
+            </div>
+          </div>
+
+          <!-- Error 3 -->
+          <div class="card trouble-item">
+            <div class="card-title" style="color: var(--danger);">
+              <span>❌</span> KeyError: 'CERT_PATH' أو متغيرات فارغة في بايثون
+            </div>
+            <div class="card-text">
+              <strong>السبب:</strong> محاولة قراءة المتغير البيئي في كود بايثون دون تمريره داخل كتلة <code class="code-tag">env:</code> الخاصة بالخطوة في ملف الـ Workflow.
+            </div>
+            <div class="callout success">
+              <div class="callout-icon">✅</div>
+              <div class="callout-content">
+                <strong>الحل:</strong> تعريف كل مسار في <code class="code-tag">env:</code> الخاص بنفس الـ step قبل استدعائه.
+              </div>
+            </div>
+          </div>
+
+          <!-- Error 4 -->
+          <div class="card trouble-item">
+            <div class="card-title" style="color: var(--danger);">
+              <span>❌</span> No profiles found matching / No signing certificate
+            </div>
+            <div class="card-text">
+              <strong>السبب:</strong> ضبط إعدادات التوقيع في Xcode على Automatic، مما يجعل المحرك يحاول الاتصال بحساب مطور Apple غير موجود على السيرفر.
+            </div>
+            <div class="callout success">
+              <div class="callout-icon">✅</div>
+              <div class="callout-content">
+                <strong>الحل:</strong> تعيين <code class="code-tag">CODE_SIGN_STYLE = Manual</code> في ملف <code class="code-tag">Release.xcconfig</code> وتطابق اسم الـ Profile مع القيمة الموجودة في <code class="code-tag">ExportOptions.plist</code>.
+              </div>
+            </div>
+          </div>
+
+          <!-- Error 5 -->
+          <div class="card trouble-item">
+            <div class="card-title" style="color: var(--danger);">
+              <span>❌</span> The following plugins do not support Swift Package Manager for iOS
+            </div>
+            <div class="card-text">
+              <strong>السبب:</strong> قيام إصدارات Flutter الحديثة بتفعيل Swift Package Manager (SPM) تلقائياً، مع وجود حزم قديمة تعتمد كلياً على CocoaPods.
+            </div>
+            <div class="callout success">
+              <div class="callout-icon">✅</div>
+              <div class="callout-content">
+                <strong>الحل:</strong> تنفيذ أمر التعطيل في خطوة البناء:
+                <br>
+                <code class="code-tag">flutter config --no-enable-swift-package-manager</code> وإنشاء مجلد <code class="code-tag">build/ios/SourcePackages</code>.
+              </div>
+            </div>
+          </div>
+
+          <!-- Error 6 -->
+          <div class="card trouble-item">
+            <div class="card-title" style="color: var(--danger);">
+              <span>❌</span> Validation failed (409) SDK version issue ... must be built with iOS SDK
+            </div>
+            <div class="card-text">
+              <strong>السبب:</strong> تشغيل الـ Workflow على صورة قديمة مثل <code class="code-tag">macos-14</code> أو <code class="code-tag">macos-15</code> تحتوي على إصدار iOS SDK قديم رفضته أبل.
+            </div>
+            <div class="callout success">
+              <div class="callout-icon">✅</div>
+              <div class="callout-content">
+                <strong>الحل:</strong> استخدام <code class="code-tag">runs-on: macos-latest</code> (أو أحدث صورة نظام معتمدة من GitHub مثل macos-15 / macos-14 / macos-26) والمزودة بأحدث إصدارات Xcode المعتمدة لدى Apple.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>تم إعداد هذا الدليل التفاعلي ليكون قالباً عاماً ونظاماً قياسياً لنشر تطبيقات الهاتف المحمول عبر GitHub Actions </p>
+        <p style="margin-top: 6px; font-size: 11px;">Universal CI/CD Workflow Template • Clean Architecture & Secure Key Management</p>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- JavaScript for Interactivity -->
+  <script>
+    // Copy snippet with notification
+    function copySnippet(button) {
+      const codeWrapper = button.closest('.code-wrapper');
+      const codeContent = codeWrapper.querySelector('.code-content');
+      const textToCopy = codeContent.innerText;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("✓ تم نسخ الكود بنجاح إلى الحافظة!");
+        const originalText = button.innerText;
+        button.innerText = "تم النسخ!";
+        button.style.background = "var(--success)";
+        button.style.color = "#000";
+        setTimeout(() => {
+          button.innerText = originalText;
+          button.style.background = "";
+          button.style.color = "";
+        }, 2000);
+      }).catch(err => {
+        showToast("❌ تعذر النسخ التلقائي، يمكنك نسخه يدوياً");
+      });
+    }
+
+    // Toast Manager
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Tab Switching
+    function switchTab(tabId, button) {
+      const card = button.closest('.card');
+      const tabs = card.querySelectorAll('.tab-content');
+      const buttons = card.querySelectorAll('.tab-btn');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      const activeTab = document.getElementById(tabId);
+      if (activeTab) activeTab.classList.add('active');
+      button.classList.add('active');
+    }
+
+    // Live Variable Replacer
+    const bundleInput = document.getElementById('input-bundle-id');
+    const teamInput = document.getElementById('input-team-id');
+    const profileInput = document.getElementById('input-profile-name');
+    const emailInput = document.getElementById('input-email');
+
+    function updateDynamicVariables() {
+      const bundle = bundleInput.value.trim() || 'com.yourcompany.yourapp';
+      const team = teamInput.value.trim() || 'YOUR_TEAM_ID';
+      const profile = profileInput.value.trim() || 'YourApp_AppStore';
+      const email = emailInput.value.trim() || 'developer@yourcompany.com';
+
+      document.querySelectorAll('.dyn-bundle').forEach(el => el.innerText = bundle);
+      document.querySelectorAll('.dyn-team').forEach(el => el.innerText = team);
+      document.querySelectorAll('.dyn-profile').forEach(el => el.innerText = profile);
+      document.querySelectorAll('.dyn-email').forEach(el => el.innerText = email);
+    }
+
+    bundleInput.addEventListener('input', updateDynamicVariables);
+    teamInput.addEventListener('input', updateDynamicVariables);
+    profileInput.addEventListener('input', updateDynamicVariables);
+    emailInput.addEventListener('input', updateDynamicVariables);
+
+    // Checklist and Progress Tracker
+    const totalSteps = 10;
+    let completedSteps = JSON.parse(localStorage.getItem('ios_cicd_completed_steps') || '{}');
+
+    function updateProgress() {
+      const completedCount = Object.keys(completedSteps).filter(k => completedSteps[k]).length;
+      const percentage = Math.round((completedCount / totalSteps) * 100);
+
+      document.getElementById('progress-percent').innerText = percentage + '%';
+      document.getElementById('progress-fill').style.width = percentage + '%';
+    }
+
+    function toggleStep(stepIndex, btn) {
+      if (completedSteps[stepIndex]) {
+        delete completedSteps[stepIndex];
+        btn.classList.remove('completed');
+        btn.innerHTML = '<span>✓</span> تم الإنجاز';
+      } else {
+        completedSteps[stepIndex] = true;
+        btn.classList.add('completed');
+        btn.innerHTML = '<span>✓</span> مكتمل';
+        showToast("🎉 رائع! تم إنجاز هذه الخطوة بنجاح");
+      }
+      localStorage.setItem('ios_cicd_completed_steps', JSON.stringify(completedSteps));
+      updateProgress();
+    }
+
+    // Restore step state on load
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.step-check-btn').forEach((btn, idx) => {
+        if (completedSteps[idx]) {
+          btn.classList.add('completed');
+          btn.innerHTML = '<span>✓</span> مكتمل';
+        }
+      });
+      updateProgress();
+      updateDynamicVariables();
+    });
+
+    // Troubleshooting filter
+    function filterTroubles() {
+      const query = document.getElementById('trouble-search').value.toLowerCase();
+      const cards = document.querySelectorAll('.trouble-item');
+
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(query)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // ScrollSpy for Active Sidebar Links
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.section-container');
+      const navItems = document.querySelectorAll('.nav-item');
+      let currentSectionId = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (window.scrollY >= sectionTop) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        const link = item.querySelector('a');
+        if (link && link.getAttribute('href') === '#' + currentSectionId) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دليل خطوات ربط Facebook SDK وزر تثبيت التطبيق في الإعلانات</title>
+  <!-- Google Fonts: Cairo & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0d14;
+      --bg-secondary: #111726;
+      --bg-card: rgba(22, 30, 49, 0.7);
+      --bg-card-hover: rgba(28, 38, 62, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(0, 129, 251, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --meta-blue: #0081fb;
+      --meta-blue-hover: #1877f2;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #8b5cf6;
+      --code-bg: #090d16;
+      --glow-blue: 0 0 35px -5px rgba(0, 129, 251, 0.35);
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      --radius: 14px;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: #ffffff;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-active: rgba(0, 129, 251, 0.5);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --code-bg: #1e293b;
+      --glow-blue: 0 10px 30px -10px rgba(0, 129, 251, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(0, 129, 251, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    /* Layout Structure */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 300px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-subtle);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      z-index: 40;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #0081fb, #0052cc);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 129, 251, 0.4);
+      color: white;
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      font-size: 0.75rem;
+      color: var(--meta-blue);
+      font-weight: 600;
+    }
+
+    .nav-search {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .nav-search input {
+      width: 100%;
+      padding: 9px 36px 9px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .nav-search input:focus {
+      border-color: var(--meta-blue);
+      box-shadow: 0 0 0 3px rgba(0, 129, 251, 0.15);
+    }
+
+    .nav-search svg {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-dim);
+    }
+
+    .nav-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      margin: 1rem 0 0.5rem 0.5rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav-item a:hover {
+      background: rgba(0, 129, 251, 0.1);
+      color: var(--meta-blue);
+      transform: translateX(-4px);
+    }
+
+    .nav-item.active a {
+      background: linear-gradient(90deg, rgba(0, 129, 251, 0.15), rgba(0, 129, 251, 0.05));
+      color: var(--meta-blue);
+      font-weight: 700;
+      border-right: 3px solid var(--meta-blue);
+    }
+
+    .nav-badge {
+      margin-right: auto;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+    }
+
+    /* Sidebar Footer Progress */
+    .sidebar-progress {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .progress-bar-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--meta-blue), var(--accent-emerald));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      padding: 2.5rem 3.5rem;
+      max-width: 1200px;
+      overflow-y: auto;
+    }
+
+    /* Top Action Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .breadcrumb a {
+      color: var(--meta-blue);
+      text-decoration: none;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--meta-blue);
+      color: white;
+      box-shadow: 0 4px 14px rgba(0, 129, 251, 0.35);
+    }
+
+    .btn-primary:hover {
+      background: var(--meta-blue-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-active);
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(0, 129, 251, 0.14) 0%, rgba(139, 92, 246, 0.08) 100%), var(--bg-card);
+      border: 1px solid var(--border-active);
+      border-radius: var(--radius);
+      padding: 2.2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--glow-blue);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: -60px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(0, 129, 251, 0.35) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 129, 251, 0.18);
+      color: #60a5fa;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(0, 129, 251, 0.3);
+    }
+
+    .hero-title {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 820px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 1.2rem;
+    }
+
+    .stat-info .stat-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .stat-info .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Live Variable Customizer Bar (WOW Factor) */
+    .variable-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .variable-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .variable-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-cyan);
+    }
+
+    .variable-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .var-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .var-field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .var-field input {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .var-field input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+    }
+
+    /* Section & Steps Layout */
+    .guide-section {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-number-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--meta-blue), #3b82f6);
+      color: white;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 129, 251, 0.3);
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .section-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    /* Content Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      margin-bottom: 1.5rem;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+    }
+
+    .card:hover {
+      border-color: var(--border-active);
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+      display: flex;
+      gap: 14px;
+      font-size: 0.88rem;
+      border: 1px solid transparent;
+    }
+
+    .callout-info {
+      background: rgba(0, 129, 251, 0.08);
+      border-color: rgba(0, 129, 251, 0.25);
+      color: #93c5fd;
+    }
+
+    .callout-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+
+    .callout-success {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+
+    .callout-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Modern Table */
+    .table-responsive {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      margin: 1.2rem 0;
+      overflow: hidden;
+      direction: ltr; /* Code always LTR */
+      text-align: left;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .code-lang-tag {
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--meta-blue);
+    }
+
+    .code-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      color: var(--text-muted);
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: var(--meta-blue);
+      color: white;
+      border-color: var(--meta-blue);
+    }
+
+    .copy-btn.copied {
+      background: var(--accent-emerald);
+      color: white;
+      border-color: var(--accent-emerald);
+    }
+
+    pre {
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    /* Tabbed interface for platform configuration */
+    .tabs-header {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 1.25rem;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--meta-blue);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--meta-blue);
+      border-radius: 2px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Interactive Checklist */
+    .checklist-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .checklist-item:hover {
+      border-color: var(--border-active);
+      background: var(--bg-card-hover);
+    }
+
+    .checklist-item.checked {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .checklist-item.checked .checklist-title {
+      text-decoration: line-through;
+      color: var(--text-dim);
+    }
+
+    .custom-checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .checklist-item.checked .custom-checkbox {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      color: white;
+    }
+
+    .checklist-content {
+      flex: 1;
+    }
+
+    .checklist-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .checklist-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+      .app-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-left: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .main-content {
+        padding: 1.5rem;
+      }
+      .hero-title {
+        font-size: 1.6rem;
+      }
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Element -->
+  <div id="toast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toast-text">تم النسخ بنجاح!</span>
+  </div>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <!-- Meta SVG -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Meta App Events</h1>
+          <span>دليل تثبيت الحملات والإعلانات</span>
+        </div>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="nav-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="navSearchInput" placeholder="بحث سريع في الخطوات..." onkeyup="filterNav()" />
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="nav-section-title">مراحل التنفيذ</div>
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item active"><a href="#overview"><span>1. الأهداف والفوائد</span><span class="nav-badge">نظرة عامة</span></a></li>
+        <li class="nav-item"><a href="#meta-dashboard"><span>2. لوحة Meta Developers</span><span class="nav-badge">البيانات</span></a></li>
+        <li class="nav-item"><a href="#flutter-packages"><span>3. حزمة Flutter</span><span class="nav-badge">Pubspec</span></a></li>
+        <li class="nav-item"><a href="#native-config"><span>4. إعدادات Native</span><span class="nav-badge">Android/iOS</span></a></li>
+        <li class="nav-item"><a href="#code-service"><span>5. كود الخدمة والتهيئة</span><span class="nav-badge">Dart</span></a></li>
+        <li class="nav-item"><a href="#testing-verification"><span>6. الفحص والتحقق</span><span class="nav-badge">Testing</span></a></li>
+        <li class="nav-item"><a href="#troubleshooting"><span>7. حل أشهر المشاكل</span><span class="nav-badge">FAQ</span></a></li>
+        <li class="nav-item"><a href="#checklist"><span>8. قائمة المهام التفاعلية</span><span class="nav-badge">Checklist</span></a></li>
+      </ul>
+
+      <!-- Progress Section in Sidebar -->
+      <div class="sidebar-progress">
+        <div class="progress-header">
+          <span style="color: var(--text-muted);">نسبة الإنجاز</span>
+          <span id="progressText" style="color: var(--accent-emerald);">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Top Action Bar -->
+      <div class="top-bar">
+        <div class="breadcrumb">
+          <span>دليل المطور</span>
+          <span>/</span>
+          <a href="#">Facebook SDK & App Install Ads</a>
+          <span>/</span>
+          <span>Flutter Documentation</span>
+        </div>
+        <div class="controls-group">
+          <button class="btn btn-secondary" onclick="toggleTheme()" id="themeToggleBtn">
+            <span id="themeIcon">☀️</span> الوضع النهاري
+          </button>
+          <button class="btn btn-primary" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            طباعة / حفظ PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Header -->
+      <div class="hero-banner">
+        <div class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          الدليل الهندسي المعتمد
+        </div>
+        <h2 class="hero-title">دليل ربط Facebook SDK وزر تثبيت التطبيق في إعلانات Meta</h2>
+        <p class="hero-desc">
+          خطوات متكاملة ومجرّبة لتفعيل زر "Install App" في حملات فيسبوك وإنستغرام، وتتبع التثبيتات تلقائياً (App Installs) وربط أحداث التطبيق (App Events) بكفاءة مع أحدث إصدارات Flutter لنظامي iOS و Android.
+        </p>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-icon" style="color: var(--meta-blue);">🎯</div>
+            <div class="stat-info">
+              <div class="stat-value">App Installs & CPI</div>
+              <div class="stat-label">احتساب تكلفة التثبيت الدقيقة</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="color: var(--accent-emerald);">⚡</div>
+            <div class="stat-info">
+              <div class="stat-value">Auto Logging</div>
+              <div class="stat-label">تتبع تلقائي بدون تعقيد برمجيات</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="color: var(--accent-purple);">👥</div>
+            <div class="stat-info">
+              <div class="stat-value">Custom Audiences</div>
+              <div class="stat-label">إعادة استهداف ذكية للجماهير</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Dynamic Variable Customizer -->
+      <div class="variable-card">
+        <div class="variable-card-header">
+          <div class="variable-card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <span>مخصّص البيانات الفوري (Live Variable Injector)</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-dim);">اكتب بيانات مشروعك لتحديث كل الأكواد أدناه فورياً!</span>
+        </div>
+        <div class="variable-grid">
+          <div class="var-field">
+            <label>Facebook App ID (معرف التطبيق)</label>
+            <input type="text" id="inputAppId" value="1003409726093633" oninput="updateDynamicValues()" placeholder="1003409726093633" />
+          </div>
+          <div class="var-field">
+            <label>Client Token (رمز العميل - 32 حرف Hex)</label>
+            <input type="text" id="inputClientToken" value="403196df8e10cd71601b022eaff33dd0" oninput="updateDynamicValues()" placeholder="403196df8e10cd71601b022eaff33dd0" />
+          </div>
+          <div class="var-field">
+            <label>اسم التطبيق المعروض (App Display Name)</label>
+            <input type="text" id="inputAppName" value="Mondera Real Estate App" oninput="updateDynamicValues()" placeholder="اسم التطبيق" />
+          </div>
+          <div class="var-field">
+            <label>Package / Bundle ID</label>
+            <input type="text" id="inputBundleId" value="com.codebyte.mondera" oninput="updateDynamicValues()" placeholder="com.example.app" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 1: Overview -->
+      <section id="overview" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">1</div>
+          <div>
+            <h3 class="section-title">الهدف والفوائد التسويقية والتقنية</h3>
+            <p class="section-subtitle">لماذا نحتاج ربط Facebook SDK في تطبيق فلاتر؟</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <p style="margin-bottom: 1rem; color: var(--text-muted);">
+            عند إطلاق حملات إعلانية على فيسبوك وإنستغرام لزيادة تثبيتات التطبيق (App Promotion Campaigns)، يحتاج مدير الإعلانات (Meta Ads Manager) إلى اتصال مباشر مع التطبيق للتعرف على نتائج الإعلان:
+          </p>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1rem; border-radius: 10px;">
+              <h4 style="color: var(--meta-blue); margin-bottom: 6px; font-size: 0.95rem;">1. تفعيل زر التثبيت (Install Now)</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">
+                تتحول الإعلانات من مجرد زيارات روابط ويب إلى زر مباشر لتثبيت التطبيق على متجري Google Play و App Store مع احتساب التثبيت.
+              </p>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1rem; border-radius: 10px;">
+              <h4 style="color: var(--accent-emerald); margin-bottom: 6px; font-size: 0.95rem;">2. تتبع التحويلات وتكلفة التثبيت (CPI)</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">
+                تحديد التكلفة الفعلية لكل عملية تثبيت قادمة من إعلان محدد (Cost Per Install)، مما يرفع كفاءة خوارزميات الذكاء الاصطناعي لـ Meta.
+              </p>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1rem; border-radius: 10px;">
+              <h4 style="color: var(--accent-purple); margin-bottom: 6px; font-size: 0.95rem;">3. تتبع الأحداث وسلوك المستخدم</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">
+                تسجيل فتح التطبيق (`fb_mobile_activate_app`)، تسجيل الحساب، استعراض المنتجات أو العقارات، لتمكين إعادة الاستهداف (Retargeting).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Meta Dashboard Requirements -->
+      <section id="meta-dashboard" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">2</div>
+          <div>
+            <h3 class="section-title">إعداد لوحة Meta for Developers والبيانات المطلوبة</h3>
+            <p class="section-subtitle">الحصول على مفاتيح الربط وتجهيز منصتي Android و iOS</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>📋 البيانات التي يجب استخراجها من لوحة Meta</span>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>البيان المطلوب</th>
+                  <th>الوصف</th>
+                  <th>المثال الافتراضي</th>
+                  <th>أين تجده في لوحة Meta؟</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Facebook App ID</strong></td>
+                  <td>المعرف الرقمي الفريد للتطبيق</td>
+                  <td><code class="dyn-app-id">1003409726093633</code></td>
+                  <td>أعلى الصفحة في <a href="https://developers.facebook.com/apps/" target="_blank" style="color: var(--meta-blue);">developers.facebook.com</a></td>
+                </tr>
+                <tr>
+                  <td><strong>Client Token</strong></td>
+                  <td>رمز العميل المشفّر (32 خانة Hex)</td>
+                  <td><code class="dyn-client-token">403196df8e10cd71601b022eaff33dd0</code></td>
+                  <td>Settings &gt; Advanced &gt; Security &gt; Client Token</td>
+                </tr>
+                <tr>
+                  <td><strong>App Display Name</strong></td>
+                  <td>اسم التطبيق المعروض</td>
+                  <td><span class="dyn-app-name">Mondera Real Estate App</span></td>
+                  <td>Settings &gt; Basic &gt; Display Name</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warning">
+            <div class="callout-icon">⚠️</div>
+            <div>
+              <strong>تنبيه هام جداً بخصوص Client Token:</strong><br/>
+              ابتداءً من إصدارات Facebook SDK الحديثة، أصبح وجود <code>Client Token</code> إلزامياً! بدونه لن تصل الأحداث إلى لوحة تحكم Meta إطلاقاً وسيعمل التطبيق بدون تتبع.
+            </div>
+          </div>
+
+          <div class="card-title" style="margin-top: 1.5rem;">
+            <span>📱 بيانات يجب إدخالها داخل لوحة Meta لكل نظام</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 10px;">
+              <h4 style="color: var(--accent-emerald); margin-bottom: 8px;">🤖 منصة Android</h4>
+              <ul style="padding-right: 1.25rem; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
+                <li><strong>Package Name:</strong> <code class="dyn-bundle-id">com.codebyte.mondera</code></li>
+                <li><strong>Class Name:</strong> <code class="dyn-main-activity">com.codebyte.mondera.MainActivity</code></li>
+                <li><strong>Key Hashes:</strong> بصمة مفتاح التوقيع بصيغة Base64 (Debug و Release).</li>
+              </ul>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 10px;">
+              <h4 style="color: #60a5fa; margin-bottom: 8px;">🍎 منصة iOS</h4>
+              <ul style="padding-right: 1.25rem; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
+                <li><strong>Bundle ID:</strong> <code class="dyn-bundle-id">com.codebyte.mondera</code></li>
+                <li><strong>App Store ID:</strong> المعرف الرقمي على متجر آبل (10 أرقام) مثل <code>6792721128</code>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Command to generate Key Hash -->
+          <div style="margin-top: 1.25rem;">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              أمر استخراج <strong>Debug Key Hash</strong> لأندرويد عبر الـ Terminal لنظام Mac/Linux:
+            </p>
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-tag">bash</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الأمر</button>
+              </div>
+              <pre><code>keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore | openssl sha1 -binary | openssl base64</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Flutter Packages -->
+      <section id="flutter-packages" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">3</div>
+          <div>
+            <h3 class="section-title">تثبيت حزمة Flutter الرسمية</h3>
+            <p class="section-subtitle">إضافة <code>facebook_app_events</code> إلى مشروع فلاتر</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+            يمكنك إضافة الحزمة مباشرة عبر الـ Terminal بأمر فلاتر السريع:
+          </p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-tag">terminal</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الأمر</button>
+            </div>
+            <pre><code>flutter pub add facebook_app_events:^0.30.5</code></pre>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">
+            أو بإضافتها يدوياً داخل ملف <code>pubspec.yaml</code> تحت قسم <code>dependencies:</code>:
+          </p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-tag">yaml</span>
+              <span style="color: var(--text-dim);">pubspec.yaml</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+            </div>
+            <pre><code>dependencies:
+  flutter:
+    sdk: flutter
+  facebook_app_events: ^0.30.5</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Native Configuration -->
+      <section id="native-config" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">4</div>
+          <div>
+            <h3 class="section-title">إعدادات ملفات الـ Native (Android و iOS)</h3>
+            <p class="section-subtitle">حقن مفاتيح الربط في طبقة النظام لتمكين الإقلاع والربط التلقائي</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <!-- Platform Tabs -->
+          <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('android-tab', this)">
+              🤖 إعدادات Android
+            </button>
+            <button class="tab-btn" onclick="switchTab('ios-tab', this)">
+              🍎 إعدادات iOS
+            </button>
+          </div>
+
+          <!-- Tab Android -->
+          <div id="android-tab" class="tab-content active">
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--accent-emerald);">
+              1. ملف القيم: <code>android/app/src/main/res/values/strings.xml</code>
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              أنشئ الملف إذا لم يكن موجوداً، وأضف القيم الخاصة بالـ App ID و الـ Client Token:
+            </p>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-tag">xml</span>
+                <span style="color: var(--text-dim);">strings.xml</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+              </div>
+              <pre><code id="codeStringsXml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;resources&gt;
+    &lt;!-- مفاتيح الربط مع لوحة Meta --&gt;
+    &lt;string name="facebook_app_id"&gt;1003409726093633&lt;/string&gt;
+    &lt;string name="fb_login_protocol_scheme"&gt;fb1003409726093633&lt;/string&gt;
+    &lt;string name="facebook_client_token"&gt;403196df8e10cd71601b022eaff33dd0&lt;/string&gt;
+&lt;/resources&gt;</code></pre>
+            </div>
+
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--accent-emerald);">
+              2. ملف المانيفست: <code>android/app/src/main/AndroidManifest.xml</code>
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              تأكد من وجود إذن الإنترنت، ثم أضف وسوم الـ <code>&lt;meta-data&gt;</code> داخل وسم <code>&lt;application&gt;</code>:
+            </p>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-tag">xml</span>
+                <span style="color: var(--text-dim);">AndroidManifest.xml</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+              </div>
+              <pre><code>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ...&gt;
+    &lt;!-- إذن الإنترنت --&gt;
+    &lt;uses-permission android:name="android.permission.INTERNET"/&gt;
+
+    &lt;application ...&gt;
+        
+        &lt;!-- إعدادات Facebook SDK --&gt;
+        &lt;meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" /&gt;
+        &lt;meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" /&gt;
+
+    &lt;/application&gt;
+&lt;/manifest&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- Tab iOS -->
+          <div id="ios-tab" class="tab-content">
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; color: #60a5fa;">
+              1. ملف الإعدادات: <code>ios/Runner/Info.plist</code>
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              داخل وسم <code>&lt;dict&gt;</code> الرئيسي، أضف المخطط والمفاتيح التالية:
+            </p>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-tag">xml</span>
+                <span style="color: var(--text-dim);">Info.plist</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+              </div>
+              <pre><code id="codeInfoPlist">&lt;key&gt;CFBundleURLTypes&lt;/key&gt;
+&lt;array&gt;
+    &lt;dict&gt;
+        &lt;key&gt;CFBundleURLSchemes&lt;/key&gt;
+        &lt;array&gt;
+            &lt;string&gt;fb1003409726093633&lt;/string&gt;
+        &lt;/array&gt;
+    &lt;/dict&gt;
+&lt;/array&gt;
+
+&lt;!-- بيانات تعريف تطبيق Facebook SDK --&gt;
+&lt;key&gt;FacebookAppID&lt;/key&gt;
+&lt;string&gt;1003409726093633&lt;/string&gt;
+&lt;key&gt;FacebookClientToken&lt;/key&gt;
+&lt;string&gt;403196df8e10cd71601b022eaff33dd0&lt;/string&gt;
+&lt;key&gt;FacebookDisplayName&lt;/key&gt;
+&lt;string&gt;Mondera Real Estate App&lt;/string&gt;
+
+&lt;!-- تفعيل التتبع التلقائي وجمع المعرفات --&gt;
+&lt;key&gt;FacebookAutoLogAppEventsEnabled&lt;/key&gt;
+&lt;true/&gt;
+&lt;key&gt;FacebookAdvertiserIDCollectionEnabled&lt;/key&gt;
+&lt;true/&gt;</code></pre>
+            </div>
+
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #60a5fa;">
+              2. تثبيت مكتبات CocoaPods بأمان (تجنب مشاكل UTF-8)
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              شغل هذا الأمر داخل الطرفية (Terminal) لتثبيت حزم iOS وتجنب انهيار Ruby بسبب مشاكل الترميز:
+            </p>
+
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-tag">bash</span>
+                <button class="copy-btn" onclick="copyCode(this)">نسخ الأمر</button>
+              </div>
+              <pre><code>cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install && cd ..</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Dart Service & Initialization -->
+      <section id="code-service" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">5</div>
+          <div>
+            <h3 class="section-title">كود خدمة الفلاتر والتهيئة عند الإقلاع</h3>
+            <p class="section-subtitle">تصميم خدمة برمجية موحدة Singleton جاهزة لجميع الأحداث</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>📦 1. ملف الخدمة: <code>lib/core/service/generic/facebook_events_service.dart</code></span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            تغليف كافة عمليات التتبع وحماية التطبيق من الانهيار عند حدوث أي خطأ، مع دعم التتبع التلقائي والأحداث القياسية:
+          </p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-tag">dart</span>
+              <span style="color: var(--text-dim);">facebook_events_service.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ ملف الخدمة كاملاً</button>
+            </div>
+            <pre><code>import 'package:facebook_app_events/facebook_app_events.dart';
+import 'package:flutter/foundation.dart';
+
+class FacebookEventsService {
+  FacebookEventsService._();
+
+  static final FacebookEventsService instance = FacebookEventsService._();
+  static final FacebookAppEvents _facebookAppEvents = FacebookAppEvents();
+
+  FacebookAppEvents get client => _facebookAppEvents;
+
+  /// تهيئة الخدمة وتفعيل التتبع التلقائي وجمع معرف الإعلانات
+  /// تنبيه: تم استبدال setAdvertiserTracking بـ setAdvertiserIdCollectionEnabled لتفادي أخطاء الإصدارات الحديثة
+  Future&lt;void&gt; initialize() async {
+    try {
+      await _facebookAppEvents.setAutoLogAppEventsEnabled(true);
+      await _facebookAppEvents.setAdvertiserIdCollectionEnabled(true);
+      debugPrint('✅ [FacebookSDK] Initialized successfully. AutoLogAppEvents enabled.');
+    } catch (e) {
+      debugPrint('❌ FacebookEventsService init error: $e');
+    }
+  }
+
+  /// تسجيل حدث مخصص عام
+  Future&lt;void&gt; logEvent({
+    required String name,
+    Map&lt;String, dynamic&gt;? parameters,
+    double? valueToSum,
+  }) async {
+    try {
+      await _facebookAppEvents.logEvent(
+        name: name,
+        parameters: parameters,
+        valueToSum: valueToSum,
+      );
+      debugPrint('📊 [FacebookSDK] Event logged: $name, params: $parameters');
+    } catch (e) {
+      debugPrint('❌ FacebookEventsService logEvent error: $e');
+    }
+  }
+
+  /// تسجيل حدث استعراض محتوى (عقار / منتج)
+  Future&lt;void&gt; logViewContent({
+    String? id,
+    String? type,
+    String? currency,
+    double? price,
+  }) async {
+    try {
+      await _facebookAppEvents.logViewContent(
+        id: id,
+        type: type,
+        currency: currency,
+        price: price,
+      );
+    } catch (e) {
+      debugPrint('❌ FacebookEventsService logViewContent error: $e');
+    }
+  }
+
+  /// تسجيل حدث إتمام إنشاء حساب جديد
+  Future&lt;void&gt; logCompletedRegistration({String? registrationMethod}) async {
+    try {
+      await _facebookAppEvents.logCompletedRegistration(
+        registrationMethod: registrationMethod,
+      );
+    } catch (e) {
+      debugPrint('❌ FacebookEventsService logCompletedRegistration error: $e');
+    }
+  }
+
+  /// ربط معرف المستخدم (User ID) لتتبع رحلة العميل
+  Future&lt;void&gt; setUserID(String id) async {
+    try {
+      await _facebookAppEvents.setUserID(id);
+    } catch (e) {
+      debugPrint('❌ FacebookEventsService setUserID error: $e');
+    }
+  }
+
+  /// حذف معرف المستخدم عند تسجيل الخروج
+  Future&lt;void&gt; clearUserID() async {
+    try {
+      await _facebookAppEvents.clearUserID();
+    } catch (e) {
+      debugPrint('❌ FacebookEventsService clearUserID error: $e');
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div class="card-title" style="margin-top: 1.5rem;">
+            <span>🚀 2. التهيئة السلسة في <code>lib/main.dart</code></span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            استخدام <code>unawaited(...)</code> لضمان عدم تأخير فتح واجهة التطبيق (Splash Screen) أثناء اتصال الـ SDK بالخادم:
+          </p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span class="code-lang-tag">dart</span>
+              <span style="color: var(--text-dim);">main.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
+            </div>
+            <pre><code>import 'dart:async';
+import 'package:flutter/material.dart';
+import 'core/service/generic/facebook_events_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // تشغيل تهيئة Facebook SDK بشكل غير متزامن بدون تجميد إقلاع التطبيق
+  unawaited(FacebookEventsService.instance.initialize());
+
+  runApp(const MyApp());
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Testing & Live Verification -->
+      <section id="testing-verification" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">6</div>
+          <div>
+            <h3 class="section-title">طرق الاختبار والتحقق المحلي والسحابي</h3>
+            <p class="section-subtitle">التأكد 100% من تدفق الأحداث وتفعيل زر التثبيت في الإعلانات</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+            
+            <!-- Terminal iOS -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 10px;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #60a5fa; margin-bottom: 6px;">
+                🍏 مراقبة السجلات لمحاكي iOS
+              </h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">
+                افتح الـ Terminal وألصق الأمر التالي، ثم شغل التطبيق:
+              </p>
+              <div class="code-wrapper" style="margin: 0;">
+                <div class="code-header">
+                  <span class="code-lang-tag">bash</span>
+                  <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+                </div>
+                <pre style="font-size: 0.78rem;"><code>xcrun simctl spawn booted log stream --predicate 'processImagePath CONTAINS "Runner" AND (eventMessage CONTAINS[c] "FBSDK" OR eventMessage CONTAINS[c] "FacebookSDK")' --style compact</code></pre>
+              </div>
+            </div>
+
+            <!-- Terminal Android -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 10px;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--accent-emerald); margin-bottom: 6px;">
+                🤖 مراقبة السجلات لأجهزة Android
+              </h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">
+                تتبع تدفق أحداث فيسبوك عبر ADB Logcat:
+              </p>
+              <div class="code-wrapper" style="margin: 0;">
+                <div class="code-header">
+                  <span class="code-lang-tag">bash</span>
+                  <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+                </div>
+                <pre style="font-size: 0.78rem;"><code>adb logcat -s FacebookSDK:V</code></pre>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Cloud Tools Verification -->
+          <div style="margin-top: 1.5rem;">
+            <div class="card-title">
+              <span>☁️ أدوات الفحص السحابية من لوحة Meta</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+              <div style="padding: 12px 16px; background: rgba(0,129,251,0.05); border: 1px solid rgba(0,129,251,0.2); border-radius: 9px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <strong style="color: var(--meta-blue); font-size: 0.95rem;">1. أداة Meta App Ads Helper</strong>
+                  <p style="font-size: 0.82rem; color: var(--text-muted);">
+                    فحص مباشر لصحة الربط؛ ضع App ID واضغط Submit لتأكيد ظهور علامة خضراء بجوار "App Events".
+                  </p>
+                </div>
+                <a href="https://developers.facebook.com/tools/app-ads-helper/" target="_blank" class="btn btn-secondary" style="font-size: 0.8rem;">
+                  فتح الأداة ↗
+                </a>
+              </div>
+
+              <div style="padding: 12px 16px; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 9px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <strong style="color: var(--accent-emerald); font-size: 0.95rem;">2. تبويب الأحداث التجريبية (Events Manager &gt; Test Events)</strong>
+                  <p style="font-size: 0.82rem; color: var(--text-muted);">
+                    شغّل التطبيق على هاتفك وراقب ظهور حدث <code>fb_mobile_activate_app</code> لحظياً على الشاشة.
+                  </p>
+                </div>
+                <a href="https://business.facebook.com/events_manager2/" target="_blank" class="btn btn-secondary" style="font-size: 0.8rem;">
+                  فتح مدير الأحداث ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Troubleshooting -->
+      <section id="troubleshooting" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">7</div>
+          <div>
+            <h3 class="section-title">أشهر المشاكل التقنية وحلولها الفورية</h3>
+            <p class="section-subtitle">إجابات المشاكل التي تظهر للمطورين أثناء الربط والرفع للمتجر</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 25%;">المشكلة</th>
+                  <th style="width: 35%;">السبب الشائع</th>
+                  <th style="width: 40%;">الحل الجذري المباشر</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong style="color: var(--accent-rose);">خطأ ترميز عند <code>pod install</code></strong></td>
+                  <td>روبي وبيئة ماك تفتقر إلى إعدادات ترميز UTF-8</td>
+                  <td>قم بتشغيل: <code>LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install</code></td>
+                </tr>
+                <tr>
+                  <td><strong style="color: var(--accent-amber);">تحذير `setAdvertiserTracking is deprecated`</strong></td>
+                  <td>تحديث Meta لطريقة تتبع الإعلانات في الإصدارات الحديثة</td>
+                  <td>استخدم <code>setAdvertiserIdCollectionEnabled(true)</code> بدلاً منها</td>
+                </tr>
+                <tr>
+                  <td><strong style="color: var(--accent-rose);">الأحداث لا تظهر نهائياً في Meta</strong></td>
+                  <td>الـ Client Token مفقود أو تم وضع App Secret بدلاً منه</td>
+                  <td>تأكد من نسخ الـ Client Token بدقة (32 حرف) من Advanced Security ووضعه في strings.xml و Info.plist</td>
+                </tr>
+                <tr>
+                  <td><strong style="color: var(--accent-cyan);">سياسات خصوصية iOS (App Tracking Transparency)</strong></td>
+                  <td>طلب آبل الشفافية عند قراءة IDFA في iOS 14.5+</td>
+                  <td>إذا كنت تريد تتبع دقيق للمستخدم عبر الإعلانات، أضف حزمة <code>app_tracking_transparency</code> وطلب الإذن بعد تشغيل التطبيق</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Interactive Checklist -->
+      <section id="checklist" class="guide-section">
+        <div class="section-header">
+          <div class="step-number-badge">8</div>
+          <div>
+            <h3 class="section-title">قائمة التحقق التفاعلية (Checklist)</h3>
+            <p class="section-subtitle">علّم على الخطوات المنجزة وسيتم حفظ تقدمك تلقائياً</p>
+          </div>
+        </div>
+
+        <div class="checklist-container" id="checklistContainer">
+          <div class="checklist-item" onclick="toggleTask(this, 0)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">إنشاء التطبيق على Meta Developers واستخراج App ID و Client Token</div>
+              <div class="checklist-desc">التأكد من نوع التطبيق ونسخ رمز العميل المشفر بدقة من قسم Security.</div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="toggleTask(this, 1)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">تسجيل منصتي Android و iOS على لوحة Meta</div>
+              <div class="checklist-desc">إدخال Package Name، Key Hashes، Bundle Identifier، و App Store ID.</div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="toggleTask(this, 2)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">إضافة حزمة <code>facebook_app_events</code> وتشغيل <code>pub get</code></div>
+              <div class="checklist-desc">تحديث pubspec.yaml والتحقق من تنزيل الحزمة بنجاح.</div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="toggleTask(this, 3)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">إعداد ملفات Android (<code>strings.xml</code> و <code>AndroidManifest.xml</code>)</div>
+              <div class="checklist-desc">حقن وسوم com.facebook.sdk.ApplicationId و ClientToken وإذن الإنترنت.</div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="toggleTask(this, 4)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">إعداد ملفات iOS (<code>Info.plist</code> وتشغيل <code>pod install</code>)</div>
+              <div class="checklist-desc">إضافة CFBundleURLSchemes ومفاتيح Facebook وتثبيت الكوكوابودز بدون أخطاء.</div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="toggleTask(this, 5)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">إنشاء كود خدمة <code>FacebookEventsService</code> واستدعاء التهيئة في <code>main.dart</code></div>
+              <div class="checklist-desc">تفعيل AutoLogAppEvents و AdvertiserIdCollectionEnabled بشكل غير معطّل للإقلاع.</div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="toggleTask(this, 6)">
+            <div class="custom-checkbox">✓</div>
+            <div class="checklist-content">
+              <div class="checklist-title">اختبار ظهور الحدث اللحظي في Meta Events Manager (Test Events)</div>
+              <div class="checklist-desc">تشغيل التطبيق ورؤية حدث fb_mobile_activate_app والتأكد من نجاح التتبع.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; color: var(--text-dim); font-size: 0.85rem;">
+        <div>
+          تم الإنشاء بواسطة فريق التطوير - دليل مرجعي لربط Meta Ads &amp; Facebook SDK
+        </div>
+        <div>
+          جاهز لجميع تطبيقات Flutter 🚀
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <script>
+    // Copy Code functionality
+    function copyCode(btn) {
+      const codeWrapper = btn.closest('.code-wrapper');
+      const codeEl = codeWrapper.querySelector('pre code') || codeWrapper.querySelector('pre');
+      const textToCopy = codeEl.innerText;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = 'تم النسخ! ✓';
+        btn.classList.add('copied');
+        showToast('تم نسخ الكود بنجاح إلى الحافظة');
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.classList.remove('copied');
+        }, 2200);
+      }).catch(err => {
+        console.error('Failed to copy', err);
+      });
+    }
+
+    // Toast alert
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toast-text');
+      toastText.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Tabs functionality
+    function switchTab(tabId, btn) {
+      const parent = btn.closest('.card');
+      parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      btn.classList.add('active');
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add('active');
+      }
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      
+      const themeIcon = document.getElementById('themeIcon');
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (newTheme === 'light') {
+        themeIcon.innerText = '🌙';
+        themeBtn.innerHTML = '<span>🌙</span> الوضع الليلي';
+      } else {
+        themeIcon.innerText = '☀️';
+        themeBtn.innerHTML = '<span>☀️</span> الوضع النهاري';
+      }
+    }
+
+    // Search / Filter Sidebar
+    function filterNav() {
+      const input = document.getElementById('navSearchInput').value.toLowerCase();
+      const items = document.querySelectorAll('#navMenu .nav-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(input)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Interactive Checklist & LocalStorage persistence
+    let taskState = JSON.parse(localStorage.getItem('meta_checklist_state') || '[]');
+
+    function initChecklist() {
+      const items = document.querySelectorAll('.checklist-item');
+      if (taskState.length !== items.length) {
+        taskState = new Array(items.length).fill(false);
+      }
+      items.forEach((item, index) => {
+        if (taskState[index]) {
+          item.classList.add('checked');
+        } else {
+          item.classList.remove('checked');
+        }
+      });
+      updateProgress();
+    }
+
+    function toggleTask(element, index) {
+      element.classList.toggle('checked');
+      taskState[index] = element.classList.contains('checked');
+      localStorage.setItem('meta_checklist_state', JSON.stringify(taskState));
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const items = document.querySelectorAll('.checklist-item');
+      const checked = document.querySelectorAll('.checklist-item.checked');
+      const percentage = Math.round((checked.length / items.length) * 100);
+
+      const bar = document.getElementById('progressBar');
+      const text = document.getElementById('progressText');
+      if (bar) bar.style.width = percentage + '%';
+      if (text) text.innerText = percentage + '%';
+    }
+
+    // Live Dynamic Values Update
+    function updateDynamicValues() {
+      const appId = document.getElementById('inputAppId').value.trim() || '1003409726093633';
+      const clientToken = document.getElementById('inputClientToken').value.trim() || '403196df8e10cd71601b022eaff33dd0';
+      const appName = document.getElementById('inputAppName').value.trim() || 'Mondera Real Estate App';
+      const bundleId = document.getElementById('inputBundleId').value.trim() || 'com.codebyte.mondera';
+
+      // Update in table & labels
+      document.querySelectorAll('.dyn-app-id').forEach(el => el.innerText = appId);
+      document.querySelectorAll('.dyn-client-token').forEach(el => el.innerText = clientToken);
+      document.querySelectorAll('.dyn-app-name').forEach(el => el.innerText = appName);
+      document.querySelectorAll('.dyn-bundle-id').forEach(el => el.innerText = bundleId);
+      document.querySelectorAll('.dyn-main-activity').forEach(el => el.innerText = bundleId + '.MainActivity');
+
+      // Update strings.xml code block
+      const stringsEl = document.getElementById('codeStringsXml');
+      if (stringsEl) {
+        stringsEl.innerText = `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <!-- مفاتيح الربط مع لوحة Meta -->\n    <string name="facebook_app_id">${appId}</string>\n    <string name="fb_login_protocol_scheme">fb${appId}</string>\n    <string name="facebook_client_token">${clientToken}</string>\n</resources>`;
+      }
+
+      // Update Info.plist code block
+      const infoPlistEl = document.getElementById('codeInfoPlist');
+      if (infoPlistEl) {
+        infoPlistEl.innerText = `<key>CFBundleURLTypes</key>\n<array>\n    <dict>\n        <key>CFBundleURLSchemes</key>\n        <array>\n            <string>fb${appId}</string>\n        </array>\n    </dict>\n</array>\n\n<!-- بيانات تعريف تطبيق Facebook SDK -->\n<key>FacebookAppID</key>\n<string>${appId}</string>\n<key>FacebookClientToken</key>\n<string>${clientToken}</string>\n<key>FacebookDisplayName</key>\n<string>${appName}</string>\n\n<!-- تفعيل التتبع التلقائي وجمع المعرفات -->\n<key>FacebookAutoLogAppEventsEnabled</key>\n<true/>\n<key>FacebookAdvertiserIDCollectionEnabled</key>\n<true/>`;
+      }
+    }
+
+    // Scroll spy for sidebar
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.guide-section');
+      const navItems = document.querySelectorAll('#navMenu .nav-item');
+      
+      let currentSection = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (window.pageYOffset >= top) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        const link = item.querySelector('a');
+        if (link && link.getAttribute('href') === '#' + currentSection) {
+          item.classList.add('active');
+        }
+      });
+    });
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      initChecklist();
+      updateDynamicValues();
+    });
+  </script>
+</body>
+</html>
