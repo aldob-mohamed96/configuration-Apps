@@ -755,11 +755,11 @@
         <div class="input-grid">
           <div class="input-group">
             <label for="input-api-key">Google Maps API Key (iOS &amp; Android)</label>
-            <input type="text" id="input-api-key" class="input-field" value="AIzaSyDefQE8J4cj1YTZIKjBmmlPFxz0bvMduxY">
+            <input type="text" id="input-api-key" class="input-field" value="" placeholder="YOUR_GOOGLE_MAPS_API_KEY (ضع مفتاحك هنا)">
           </div>
           <div class="input-group">
             <label for="input-pkg">معرّف الحزمة (Package Name / Bundle ID)</label>
-            <input type="text" id="input-pkg" class="input-field" value="com.codebyte.mondera">
+            <input type="text" id="input-pkg" class="input-field" value="com.example.app" placeholder="com.example.app">
           </div>
           <div class="input-group">
             <label for="input-lat">خط العرض الافتراضي (Initial Latitude)</label>
@@ -818,8 +818,8 @@
             <li>فعّل كلاً من: <strong>Maps SDK for Android</strong> و <strong>Maps SDK for iOS</strong>.</li>
             <li>في قسم <strong>Credentials</strong> > أنشئ <strong>API Key</strong> واضبط قيود الأمان:
               <ul>
-                <li><strong>لقيد أندرويد:</strong> حدد Package Name (<code class="dyn-pkg">com.codebyte.mondera</code>) مع بصمة SHA-1 لـ Debug و Release.</li>
-                <li><strong>لقيد أبل:</strong> حدد iOS apps مع الـ Bundle Identifier (<code class="dyn-pkg">com.codebyte.mondera</code>).</li>
+                <li><strong>لقيد أندرويد:</strong> حدد Package Name (<code class="dyn-pkg">com.example.app</code>) مع بصمة SHA-1 لـ Debug و Release.</li>
+                <li><strong>لقيد أبل:</strong> حدد iOS apps مع الـ Bundle Identifier (<code class="dyn-pkg">com.example.app</code>).</li>
               </ul>
             </li>
           </ol>
@@ -864,7 +864,7 @@
         &lt;!-- مفتاح خرائط جوجل الرسمي لأندرويد --&gt;
         &lt;meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="<span class="dyn-api-key">AIzaSyDefQE8J4cj1YTZIKjBmmlPFxz0bvMduxY</span>"/&gt;
+            android:value="<span class="dyn-api-key">YOUR_GOOGLE_MAPS_API_KEY</span>"/&gt;
 
     &lt;/application&gt;
 &lt;/manifest&gt;</code></pre>
@@ -895,7 +895,7 @@
             <pre><code class="code-content">&lt;dict&gt;
     &lt;!-- مفتاح خرائط جوجل لنظام iOS --&gt;
     &lt;key&gt;GMSApiKey&lt;/key&gt;
-    &lt;string&gt;<span class="dyn-api-key">AIzaSyDefQE8J4cj1YTZIKjBmmlPFxz0bvMduxY</span>&lt;/string&gt;
+    &lt;string&gt;<span class="dyn-api-key">YOUR_GOOGLE_MAPS_API_KEY</span>&lt;/string&gt;
 
     &lt;!-- نصوص أذونات الموقع لمتجر App Store --&gt;
     &lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;

@@ -762,23 +762,23 @@
         <div class="input-grid">
           <div class="input-group">
             <label for="input-pkg">معرّف الحزمة (Package Name / Bundle ID)</label>
-            <input type="text" id="input-pkg" class="input-field" value="com.codebyte.mondera">
+            <input type="text" id="input-pkg" class="input-field" value="com.example.app" placeholder="com.example.app">
           </div>
           <div class="input-group">
             <label for="input-web-client">Google Web Client ID</label>
-            <input type="text" id="input-web-client" class="input-field" value="698619141863-914c5va509eh5uub5l72jk6sjn4ntlk4.apps.googleusercontent.com">
+            <input type="text" id="input-web-client" class="input-field" value="" placeholder="YOUR_WEB_CLIENT_ID.apps.googleusercontent.com">
           </div>
           <div class="input-group">
             <label for="input-ios-client">Google iOS Client ID</label>
-            <input type="text" id="input-ios-client" class="input-field" value="698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd.apps.googleusercontent.com">
+            <input type="text" id="input-ios-client" class="input-field" value="" placeholder="YOUR_IOS_CLIENT_ID.apps.googleusercontent.com">
           </div>
           <div class="input-group">
             <label for="input-apple-service">Apple Service ID (Android/Web)</label>
-            <input type="text" id="input-apple-service" class="input-field" value="com.codebyte.mondera.web">
+            <input type="text" id="input-apple-service" class="input-field" value="com.example.app.web" placeholder="com.example.app.web">
           </div>
           <div class="input-group">
             <label for="input-apple-redirect">Apple Redirect URI</label>
-            <input type="text" id="input-apple-redirect" class="input-field" value="https://mondera-realestate.com/callbacks/sign_in_with_apple">
+            <input type="text" id="input-apple-redirect" class="input-field" value="https://yourdomain.com/callbacks/sign_in_with_apple" placeholder="https://yourdomain.com/callbacks/sign_in_with_apple">
           </div>
         </div>
       </section>
@@ -925,7 +925,7 @@
               <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
             </div>
             <pre><code class="code-content">&lt;key&gt;GIDClientID&lt;/key&gt;
-&lt;string&gt;<span class="dyn-ios-client">698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd.apps.googleusercontent.com</span>&lt;/string&gt;
+&lt;string&gt;<span class="dyn-ios-client">YOUR_IOS_CLIENT_ID.apps.googleusercontent.com</span>&lt;/string&gt;
 
 &lt;key&gt;CFBundleURLTypes&lt;/key&gt;
 &lt;array&gt;
@@ -935,7 +935,7 @@
         &lt;key&gt;CFBundleURLSchemes&lt;/key&gt;
         &lt;array&gt;
             &lt;!-- معكوس معرّف العميل REVERSED_CLIENT_ID --&gt;
-            &lt;string&gt;<span class="dyn-reversed-client">com.googleusercontent.apps.698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd</span>&lt;/string&gt;
+            &lt;string&gt;<span class="dyn-reversed-client">com.googleusercontent.apps.YOUR_IOS_CLIENT_ID</span>&lt;/string&gt;
         &lt;/array&gt;
     &lt;/dict&gt;
 &lt;/array&gt;</code></pre>
@@ -956,12 +956,12 @@
         <div class="card">
           <ol>
             <li>ادخل على <strong>developer.apple.com</strong> > توجه إلى <strong>Certificates, Identifiers &amp; Profiles > Identifiers</strong>.</li>
-            <li>اختر الـ <strong>App ID</strong> الخاص بتطبيقك (<span class="dyn-pkg">com.codebyte.mondera</span>) وضع علامة صح على <strong>Sign in with Apple</strong> ثم احفظ.</li>
+            <li>اختر الـ <strong>App ID</strong> الخاص بتطبيقك (<span class="dyn-pkg">com.example.app</span>) وضع علامة صح على <strong>Sign in with Apple</strong> ثم احفظ.</li>
             <li>
               <strong>لأجهزة أندرويد والويب:</strong> أنشئ <strong>Services ID</strong> جديد:
               <ul>
-                <li>Identifier: <code class="dyn-apple-service">com.codebyte.mondera.web</code></li>
-                <li>اضغط <strong>Configure</strong> وحدد الـ Primary App ID، والدومين، ورابط العودة: <br><code class="dyn-apple-redirect">https://mondera-realestate.com/callbacks/sign_in_with_apple</code></li>
+                <li>Identifier: <code class="dyn-apple-service">com.example.app.web</code></li>
+                <li>اضغط <strong>Configure</strong> وحدد الـ Primary App ID، والدومين، ورابط العودة: <br><code class="dyn-apple-redirect">https://yourdomain.com/callbacks/sign_in_with_apple</code></li>
               </ul>
             </li>
           </ol>
@@ -1053,10 +1053,10 @@
               <button class="copy-btn" onclick="copyCode(this)">نسخ الكود</button>
             </div>
             <pre><code class="code-content">final authService = SocialAuthService(
-  googleWebClientId: '<span class="dyn-web-client">698619141863-914c5va509eh5uub5l72jk6sjn4ntlk4.apps.googleusercontent.com</span>',
-  googleIosClientId: '<span class="dyn-ios-client">698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd.apps.googleusercontent.com</span>',
-  appleServiceId: '<span class="dyn-apple-service">com.codebyte.mondera.web</span>',
-  appleRedirectUri: '<span class="dyn-apple-redirect">https://mondera-realestate.com/callbacks/sign_in_with_apple</span>',
+  googleWebClientId: '<span class="dyn-web-client">YOUR_WEB_CLIENT_ID.apps.googleusercontent.com</span>',
+  googleIosClientId: '<span class="dyn-ios-client">YOUR_IOS_CLIENT_ID.apps.googleusercontent.com</span>',
+  appleServiceId: '<span class="dyn-apple-service">com.example.app.web</span>',
+  appleRedirectUri: '<span class="dyn-apple-redirect">https://yourdomain.com/callbacks/sign_in_with_apple</span>',
   linkWithFirebase: true,
 );
 
@@ -1152,10 +1152,10 @@ final appleResult = await authService.signInWithApple();</code></pre>
 
     function updateVariables() {
       const pkg = inputPkg.value.trim() || 'com.example.app';
-      const web = inputWeb.value.trim() || 'YOUR_WEB_CLIENT_ID';
+      const web = inputWeb.value.trim() || 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com';
       const ios = inputIos.value.trim() || 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com';
       const appleService = inputAppleService.value.trim() || 'com.example.app.web';
-      const appleRedirect = inputAppleRedirect.value.trim() || 'https://example.com/callbacks/sign_in_with_apple';
+      const appleRedirect = inputAppleRedirect.value.trim() || 'https://yourdomain.com/callbacks/sign_in_with_apple';
 
       const iosPrefix = ios.replace('.apps.googleusercontent.com', '');
       const reversed = 'com.googleusercontent.apps.' + iosPrefix;

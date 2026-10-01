@@ -61,8 +61,8 @@ flutter pub get
 3. **إنشاء وتأمين مفتاح الـ API:**
    - انتقل إلى **APIs & Services > Credentials** > اضغط **+ Create Credentials > API Key**.
    - انسخ المفتاح، ثم اضغط على اسمه لضبط **قيود الأمان (Restrictions)**:
-     - **تقييد أندرويد (Android apps):** أضف اسم الحزمة (`com.codebyte.mondera`) وبصمة **SHA-1** الخاصة بـ Debug و Release.
-     - **تقييد أبل (iOS apps):** أضف الـ Bundle Identifier (`com.codebyte.mondera`).
+     - **تقييد أندرويد (Android apps):** أضف اسم الحزمة (`com.example.your_app`) وبصمة **SHA-1** الخاصة بـ Debug و Release.
+     - **تقييد أبل (iOS apps):** أضف الـ Bundle Identifier (`com.example.your_app`).
      - **تقييد واجهات الـ API (API restrictions):** حدد فقط Maps SDK for Android و Maps SDK for iOS لمنع استغلال المفتاح في خدمات أخرى.
 
 ---
@@ -81,13 +81,13 @@ flutter pub get
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
-        android:label="Mondera"
+        android:label="Your App Name"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- 2. مفتاح خرائط جوجل الرسمي لأندرويد -->
+        <!-- 2. مفتاح خرائط جوجل الرسمي لأندرويد (ضع مفتاحك الحقيقي هنا) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDefQE8J4cj1YTZIKjBmmlPFxz0bvMduxY" />
+            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
 
     </application>
 </manifest>
@@ -107,13 +107,13 @@ flutter pub get
 
 ```xml
 <dict>
-    <!-- مفتاح خرائط جوجل لنظام iOS -->
+    <!-- مفتاح خرائط جوجل لنظام iOS (ضع مفتاحك الحقيقي هنا) -->
     <key>GMSApiKey</key>
-    <string>AIzaSyDefQE8J4cj1YTZIKjBmmlPFxz0bvMduxY</string>
+    <string>YOUR_GOOGLE_MAPS_API_KEY</string>
 
     <!-- نصوص أذونات الموقع (ضرورية لقبول التطبيق في App Store) -->
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>يحتاج التطبيق للوصول لموقعك لعرض الأماكن والعقارات القريبة منك على الخريطة.</string>
+    <string>يحتاج التطبيق للوصول لموقعك لعرض الأماكن والخدمات القريبة منك على الخريطة.</string>
 
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>يحتاج التطبيق للوصول لموقعك لتسهيل الملاحة والوصول للخدمات القريبة منك.</string>

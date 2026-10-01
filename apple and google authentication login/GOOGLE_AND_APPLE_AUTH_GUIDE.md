@@ -121,8 +121,8 @@ keytool -list -v -keystore android/app/keystore.jks -alias upload -storepass YOU
 
 1. نزّل ملف `GoogleService-Info.plist` من Firebase وضعه في المسار: `ios/Runner/GoogleService-Info.plist` (واحرص على إضافته عبر Xcode ليكون داخل الـ Target).
 2. افتح ملف `GoogleService-Info.plist` وانسخ قيمة المفتاحين:
-   - `CLIENT_ID`: مثلاً `698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd.apps.googleusercontent.com`
-   - `REVERSED_CLIENT_ID`: مثلاً `com.googleusercontent.apps.698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd`
+   - `CLIENT_ID`: مثلاً `YOUR_IOS_CLIENT_ID.apps.googleusercontent.com`
+   - `REVERSED_CLIENT_ID`: مثلاً `com.googleusercontent.apps.YOUR_IOS_CLIENT_ID`
 3. افتح ملف `ios/Runner/Info.plist` وأضف الإعدادات التالية:
 
 ```xml
@@ -157,18 +157,18 @@ keytool -list -v -keystore android/app/keystore.jks -alias upload -storepass YOU
 1. افتح **[Apple Developer Portal](https://developer.apple.com/account/)**.
 2. **تفعيل الميزة في الـ App ID:**
    - توجه إلى: **Certificates, Identifiers & Profiles > Identifiers**.
-   - اختر **App IDs** ثم اضغط على معرّف تطبيقك (مثل: `com.codebyte.mondera`).
+   - اختر **App IDs** ثم اضغط على معرّف تطبيقك (مثل: `com.example.app`).
    - تحت تبويب **Capabilities**، ضع علامة صح بجانب: **Sign In with Apple**.
    - اضغط **Save**.
 
 3. **إعداد Service ID (لتشغيل أبل على أندرويد والويب):**
    - اضغط **+** لإضافة Identifier جديد > اختر **Services IDs**.
    - **Description:** `App Web Auth`
-   - **Identifier:** `com.codebyte.mondera.web` (يُفضل إضافة `.web` في النهاية).
+   - **Identifier:** `com.example.app.web` (يُفضل إضافة `.web` في النهاية).
    - فعّل **Sign In with Apple** بجانبه واضغط **Configure**:
      - اختر **Primary App ID** لتطبيقك الأساسي.
-     - **Domains and Subdomains:** نطاق موقعك (مثل: `mondera-realestate.com`).
-     - **Return URLs:** رابط الـ Callback لمعالجة الرد (مثل: `https://mondera-realestate.com/callbacks/sign_in_with_apple`).
+     - **Domains and Subdomains:** نطاق موقعك (مثل: `yourdomain.com`).
+     - **Return URLs:** رابط الـ Callback لمعالجة الرد (مثل: `https://yourdomain.com/callbacks/sign_in_with_apple`).
    - اضغط **Save** ثم **Continue** ثم **Register**.
 
 4. **إنشاء مفتاح خاص (.p8 Key) لـ Firebase أو الـ Backend:**
@@ -241,11 +241,11 @@ keytool -list -v -keystore android/app/keystore.jks -alias upload -storepass YOU
 ### كيفية الاستخدام في تطبيقك:
 ```dart
 final authService = SocialAuthService(
-  googleWebClientId: '698619141863-914c5va509eh5uub5l72jk6sjn4ntlk4.apps.googleusercontent.com',
-  googleIosClientId: '698619141863-gtth4m0fkripa2qi17gchnko9tcoa5fd.apps.googleusercontent.com',
-  googleAndroidClientId: '698619141863-039g1pl7piiqt2jfgcnokpht0r7v7avr.apps.googleusercontent.com',
-  appleServiceId: 'com.codebyte.mondera.web',
-  appleRedirectUri: 'https://mondera-realestate.com/callbacks/sign_in_with_apple',
+  googleWebClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+  googleIosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+  googleAndroidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
+  appleServiceId: 'com.example.app.web',
+  appleRedirectUri: 'https://yourdomain.com/callbacks/sign_in_with_apple',
   linkWithFirebase: true, // يربط الحساب بـ FirebaseAuth تلقائياً
 );
 
